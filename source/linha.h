@@ -6,23 +6,21 @@ typedef struct {
     long int byteProxReg;
     int nroRegistros;
     int nroRegRemovidos;
-    char descrevePrefixo[18];
-	char descreveData [35];
-	char descreveLugares[42];
-	char descreveLinha [26];
-	char descreveModelo [17];
-	char descreveCategoria [20];
-
+    char descreveCodigo[15];
+    char descreveCartao[13];
+    char descreveNome[13];
+    char descreveLinha[24];
 } linhaHeader;
-typedef struct{
-	char removido;
-	int tamanhoRegistro;
-	int codLinha;
-	char aceitaCartao;
-	int tamanhoNome;
-	char nomeLinha[100];
-	int tamanhoCor;
-	char corLinha[100];
-}linha;
+
+typedef struct {
+    char removido;
+    int tamanhoRegistro;
+    int codLinha;
+    char aceitaCartao;
+    int tamanhoNome;
+    char nomeLinha[100];
+    int tamanhoCor;
+    char corLinha[100];
+} linha;
 
 #endif
