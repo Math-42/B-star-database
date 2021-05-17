@@ -40,6 +40,12 @@ int lerString(FILE* arquivo, char* string) {
     return tamanho;
 }
 
+int lerStringFixa(FILE* arquivo, char* string,int tamanhoMaximo) {
+    int tamanhoReal = lerString(arquivo,string);
+    for(int i=tamanhoReal+1;i<tamanhoMaximo;i++)string[i]= '@';//completa de @ após o \0
+    return tamanhoReal;
+}
+
 char foiRemovido(FILE* arquivo){
     char primeiroChar;
     fread(&primeiroChar, sizeof(char), 1, arquivo);
