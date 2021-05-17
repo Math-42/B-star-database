@@ -26,6 +26,7 @@ void CreateTable_Veiculo(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
 
     veiculoHeader novoHeader;
     veiculo novoVeiculo;
+    int finalDoArquivo = 0;
 
     novoHeader.status = '0';
     novoHeader.byteProxReg = 175;
@@ -35,40 +36,44 @@ void CreateTable_Veiculo(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
     lerHeaderCSV_Veiculo(arquivoCSV, &novoHeader);
 	salvaHeaderCSV_Veiculo(arquivoBin, &novoHeader);
 
-    for (int i = 0; i < 2; i++) {
-        novoVeiculo = lerVeiculo(arquivoCSV);
+    while(!finalDoArquivo) {
+        finalDoArquivo = lerVeiculo(arquivoCSV,&novoVeiculo);
         salvaVeiculo(arquivoBin, &novoVeiculo, &novoHeader);
     }
 
 	novoHeader.status = '1';
+
     salvaHeaderCSV_Veiculo(arquivoBin, &novoHeader);
+    
     fclose(arquivoBin);
     fclose(arquivoCSV);
+
+    binarioNaTela(nomeArquivoBin);
 }
 
-veiculo lerVeiculo(FILE* arquivoCSV) {
-    veiculo novoVeiculo;
+int lerVeiculo(FILE* arquivoCSV, veiculo *novoVeiculo) {
+
     int tamanhoRegistro = 0;
+    novoVeiculo->removido = foiRemovido(arquivoCSV);
 
-    tamanhoRegistro += lerStringFixa(arquivoCSV, novoVeiculo.prefixo,5);
-    tamanhoRegistro += lerStringFixa(arquivoCSV, novoVeiculo.data,10);
+    lerStringFixa(arquivoCSV, novoVeiculo->prefixo,5);
+    lerStringFixa(arquivoCSV, novoVeiculo->data,10);
 
-    novoVeiculo.quantidadeLugares = lerInteiro(arquivoCSV);
-    novoVeiculo.codLinha = lerInteiro(arquivoCSV);
+    novoVeiculo->quantidadeLugares = lerInteiro(arquivoCSV);
+    novoVeiculo->codLinha = lerInteiro(arquivoCSV);
 
-    int tamanhoModelo = lerString(arquivoCSV, novoVeiculo.modelo);
-    int tamanhoCategoria = lerString(arquivoCSV, novoVeiculo.categoria);
+    int tamanhoModelo = lerString(arquivoCSV, novoVeiculo->modelo);
+    int tamanhoCategoria = lerString(arquivoCSV, novoVeiculo->categoria);
 
     tamanhoRegistro += tamanhoModelo + tamanhoCategoria;
-    tamanhoRegistro += 4 + 4 + 4 + 4 ;//cada inteiro contido dentro da struct
+    tamanhoRegistro += 31;//tamanho da parte fixa da struct
 	
-    novoVeiculo.removido = (novoVeiculo.prefixo[0] == '*') ? '0' : '1';
-    novoVeiculo.tamanhoCategoria = tamanhoCategoria;
-    novoVeiculo.tamanhoModelo = tamanhoModelo;
-    novoVeiculo.tamanhoRegistro = tamanhoRegistro;
+    novoVeiculo->tamanhoCategoria = tamanhoCategoria;
+    novoVeiculo->tamanhoModelo = tamanhoModelo;
+    novoVeiculo->tamanhoRegistro = tamanhoRegistro;
 
-    imprimeVeiculo(novoVeiculo);
-    return novoVeiculo;
+    imprimeVeiculo(*novoVeiculo);
+    return finalDoArquivo(arquivoCSV);
 }
 
 void imprimeVeiculo(veiculo currVeiculo) {
