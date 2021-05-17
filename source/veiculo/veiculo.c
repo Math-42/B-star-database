@@ -1,17 +1,9 @@
 #include "veiculo.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "utils.h"
-
-FILE* abrirBinario_Veiculo(char nomeDoArquivo[100]) {
-    FILE* arquivo = abrirBinario(nomeDoArquivo);
-}
-
-FILE* abrirCSV_Veiculo(char nomeDoArquivo[100]) {
-    FILE* arquivo = abrirCSV(nomeDoArquivo);
-}
+#include "../utils/utils.h"
+#include "../csv/csv.h"
 
 void imprimeHeader_Veiculo(veiculoHeader header) {
     printf("Imprimindo header veiculo: \n");
@@ -36,7 +28,7 @@ void CreateTable_Veiculo(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
     veiculo novoVeiculo;
 
     novoHeader.status = '0';
-    novoHeader.byteProxReg = 174;
+    novoHeader.byteProxReg = 175;
     novoHeader.nroRegistros = 0;
     novoHeader.nroRegRemovidos = 0;
 
@@ -47,30 +39,33 @@ void CreateTable_Veiculo(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
         novoVeiculo = lerVeiculo(arquivoCSV);
         salvaVeiculo(arquivoBin, &novoVeiculo, &novoHeader);
     }
-	
+
+	novoHeader.status = '1';
     salvaHeaderCSV_Veiculo(arquivoBin, &novoHeader);
+    fclose(arquivoBin);
+    fclose(arquivoCSV);
 }
 
 veiculo lerVeiculo(FILE* arquivoCSV) {
     veiculo novoVeiculo;
     int tamanhoRegistro = 0;
 
-    tamanhoRegistro += lerString(arquivoCSV, novoVeiculo.prefixo);
-    tamanhoRegistro += lerString(arquivoCSV, novoVeiculo.data);
+    tamanhoRegistro += lerStringFixa(arquivoCSV, novoVeiculo.prefixo,5);
+    tamanhoRegistro += lerStringFixa(arquivoCSV, novoVeiculo.data,10);
+
     novoVeiculo.quantidadeLugares = lerInteiro(arquivoCSV);
     novoVeiculo.codLinha = lerInteiro(arquivoCSV);
+
     int tamanhoModelo = lerString(arquivoCSV, novoVeiculo.modelo);
     int tamanhoCategoria = lerString(arquivoCSV, novoVeiculo.categoria);
 
     tamanhoRegistro += tamanhoModelo + tamanhoCategoria;
-    tamanhoRegistro += 4 + 4 + 4 + 4 ;
+    tamanhoRegistro += 4 + 4 + 4 + 4 ;//cada inteiro contido dentro da struct
 	
     novoVeiculo.removido = (novoVeiculo.prefixo[0] == '*') ? '0' : '1';
     novoVeiculo.tamanhoCategoria = tamanhoCategoria;
     novoVeiculo.tamanhoModelo = tamanhoModelo;
     novoVeiculo.tamanhoRegistro = tamanhoRegistro;
-
-	printf("teste: %d", tamanhoModelo + tamanhoCategoria);
 
     imprimeVeiculo(novoVeiculo);
     return novoVeiculo;
@@ -92,6 +87,7 @@ void imprimeVeiculo(veiculo currVeiculo) {
 }
 
 void salvaVeiculo(FILE* arquivoBin, veiculo* currV,veiculoHeader* header) {
+    fseek(arquivoBin,header->byteProxReg,SEEK_SET);
 
     fwrite(&currV->removido, sizeof(char), 1, arquivoBin);
     fwrite(&currV->tamanhoRegistro, sizeof(int), 1, arquivoBin);
@@ -106,7 +102,7 @@ void salvaVeiculo(FILE* arquivoBin, veiculo* currV,veiculoHeader* header) {
     fwrite(&currV->tamanhoCategoria, sizeof(int), 1, arquivoBin);
     fwrite(&currV->categoria, sizeof(char), currV->tamanhoCategoria,arquivoBin);
 
-	header->byteProxReg += currV->tamanhoRegistro;
+	header->byteProxReg = ftell(arquivoBin);
 	header->nroRegRemovidos += (currV->removido == '0')? 1:0;
 	header->nroRegistros += (currV->removido == '0')? 0:1;
 }
