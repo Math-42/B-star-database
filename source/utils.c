@@ -1,3 +1,12 @@
+FILE* abrirCSV(char nomeDoArquivo[100]) {
+    FILE* arquivo = fopen(nomeDoArquivo, "r");
+    return arquivo;
+}
+
+FILE* abrirBinario(char nomeDoArquivo[100]) {
+    FILE* arquivo = fopen(nomeDoArquivo, "wb+");
+    return arquivo;
+}
 int validarInteiroLido(char string[11]) {
     if (string[0] == 'N' && string[1] == 'U' && string[2] == 'L' &&
         string[3] == 'O') {
