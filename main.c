@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "source/veiculo.h"
+#include "source/veiculo/veiculo.h"
 
 void menu(int funcionalidade) {
 	switch (funcionalidade){
