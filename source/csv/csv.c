@@ -40,9 +40,12 @@ int lerString(FILE* arquivo, char* string) {
     return tamanho;
 }
 
-int lerStringFixa(FILE* arquivo, char* string,int tamanho) {
-    for(int i=0;i<tamanho;i++)string[i]= '@';
-    return lerString(arquivo,string);
+char foiRemovido(FILE* arquivo){
+    char primeiroChar;
+    fread(&primeiroChar, sizeof(char), 1, arquivo);
+    primeiroChar = (primeiroChar == '*')? '0':'1';
+    if(primeiroChar == '1')fseek(arquivo,-1,SEEK_CUR);
+    return primeiroChar;
 }
 
 int lerInteiro(FILE* arquivo) {
