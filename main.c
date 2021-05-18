@@ -8,6 +8,14 @@ void menu(int funcionalidade) {
 		CreateTable_Veiculo("casosDeTeste/csv/veiculo.csv","casosDeTeste/out/veiculo.bin");
 		return;
 		break;
+	case 2:
+		CreateTable_Veiculo("casosDeTeste/csv/linha.csv","casosDeTeste/out/veiculo.bin");
+		return;
+		break;
+	case 3:
+		SelectFrom_Veiculo("casosDeTeste/teste/veiculo5.bin");
+		return;
+		break;
 	
 	default:
 		break;
@@ -15,6 +23,6 @@ void menu(int funcionalidade) {
 }
 
 int main() {
-	menu(1);
+	menu(3);
 	return 0;
 }
