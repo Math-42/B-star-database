@@ -101,18 +101,14 @@ int lerVeiculo_Bin(FILE* arquivoBin, veiculo* currV) {
 }
 
 void imprimeVeiculo(veiculo currVeiculo) {
-    printf("Imprimindo veiculo: \n");
-    printf("removido: %c \n", currVeiculo.removido);
-    printf("tamanhoRegistro: %d\n", currVeiculo.tamanhoRegistro);
-    printf("prefixo: %s\n", currVeiculo.prefixo);
-    printf("data: %s\n", currVeiculo.data);
-    printf("quantidadeLugares: %d\n", currVeiculo.quantidadeLugares);
-    printf("codLinha: %d\n", currVeiculo.codLinha);
-    printf("tamanhoModelo: %d\n", currVeiculo.tamanhoModelo);
-    printf("modelo: %s\n", currVeiculo.modelo);
-    printf("tamanhoCategoria: %d\n", currVeiculo.tamanhoCategoria);
-    printf("categoria: %s\n", currVeiculo.categoria);
-    printf("====================\n");
+
+    imprimirCampo("Prefixo do veiculo",currVeiculo.prefixo,0);
+    imprimirCampo("Modelo do veiculo",currVeiculo.modelo,0);
+    imprimirCampo("Categoria do veiculo",currVeiculo.categoria,0);
+    imprimeData(currVeiculo.data);
+    imprimirCampo("Quantidade de lugares sentados disponiveis",&currVeiculo.quantidadeLugares,1);
+    printf("\n");
+
 }
 
 void salvaVeiculo(FILE* arquivoBin, veiculo* currV,veiculoHeader* header) {
