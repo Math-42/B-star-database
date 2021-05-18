@@ -58,11 +58,12 @@ void CreateTable_Veiculo(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
 
 int lerVeiculo(FILE* arquivoCSV, veiculo *novoVeiculo) {
 
+int lerVeiculo_CSV(FILE* arquivoCSV, veiculo* novoVeiculo) {
     int tamanhoRegistro = 0;
     novoVeiculo->removido = foiRemovido(arquivoCSV);
 
-    lerStringFixa(arquivoCSV, novoVeiculo->prefixo,5);
-    lerStringFixa(arquivoCSV, novoVeiculo->data,10);
+    lerStringFixa(arquivoCSV, novoVeiculo->prefixo, 5);
+    lerStringFixa(arquivoCSV, novoVeiculo->data, 10);
 
     novoVeiculo->quantidadeLugares = lerInteiro(arquivoCSV);
     novoVeiculo->codLinha = lerInteiro(arquivoCSV);
@@ -71,14 +72,32 @@ int lerVeiculo(FILE* arquivoCSV, veiculo *novoVeiculo) {
     int tamanhoCategoria = lerString(arquivoCSV, novoVeiculo->categoria);
 
     tamanhoRegistro += tamanhoModelo + tamanhoCategoria;
-    tamanhoRegistro += 31;//tamanho da parte fixa da struct
-	
+    tamanhoRegistro += 31;  // tamanho da parte fixa da struct
+
     novoVeiculo->tamanhoCategoria = tamanhoCategoria;
     novoVeiculo->tamanhoModelo = tamanhoModelo;
     novoVeiculo->tamanhoRegistro = tamanhoRegistro;
 
-    imprimeVeiculo(*novoVeiculo);
     return finalDoArquivo(arquivoCSV);
+}
+
+int lerVeiculo_Bin(FILE* arquivoBin, veiculo* currV) {
+    lerStringBin(arquivoBin, &currV->removido, 1);
+    currV->tamanhoRegistro = lerInteiroBin(arquivoBin);
+
+    lerStringBin(arquivoBin, currV->prefixo, 5);
+    lerStringBin(arquivoBin, currV->data, 10);
+
+    currV->quantidadeLugares = lerInteiroBin(arquivoBin);
+    currV->codLinha = lerInteiroBin(arquivoBin);
+
+    currV->tamanhoModelo = lerInteiroBin(arquivoBin);
+    lerStringBin(arquivoBin, currV->modelo, currV->tamanhoModelo);
+
+    currV->tamanhoCategoria = lerInteiroBin(arquivoBin);
+    lerStringBin(arquivoBin, currV->categoria, currV->tamanhoCategoria);
+
+    return finalDoArquivo(arquivoBin);
 }
 
 void imprimeVeiculo(veiculo currVeiculo) {

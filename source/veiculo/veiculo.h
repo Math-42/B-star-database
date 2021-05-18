@@ -29,8 +29,8 @@ typedef struct veiculo{
     char categoria[100];
 } veiculo;
 
-void CreateTable_Veiculo(char nomeArquivoCSV[100], char nomeArquivoBin[100]);
-int lerVeiculo(FILE* arquivoCSV, veiculo *novoVeiculo);
+int lerVeiculo_Bin(FILE* arquivoBin, veiculo *novoVeiculo);
+int lerVeiculo_CSV(FILE* arquivoCSV, veiculo *novoVeiculo);
 void imprimeVeiculo(veiculo currVeiculo);
 void salvaVeiculo(FILE* arquivoBin, veiculo* currVeiculo,veiculoHeader* header);
 void lerHeaderCSV_Veiculo(FILE* arquivoCSV, veiculoHeader *header);
