@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #include "../utils/utils.h"
-#include "../csv/csv.h"
+                    "setembro", "outubro",   "novembro", "dezembro"};
 
 void imprimeHeader_Veiculo(veiculoHeader header) {
     printf("Imprimindo header veiculo: \n");
