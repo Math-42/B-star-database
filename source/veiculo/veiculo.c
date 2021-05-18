@@ -1,8 +1,14 @@
 #include "veiculo.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../binario/binario.h"
+#include "../csv/csv.h"
 #include "../utils/utils.h"
+
+char MESES[][12] = {"janeiro",  "fevereiro", "março",    "abril",
+                    "maio",     "junho",     "julho",    "agosto",
                     "setembro", "outubro",   "novembro", "dezembro"};
 
 void imprimeHeader_Veiculo(veiculoHeader header) {
@@ -18,6 +24,17 @@ void imprimeHeader_Veiculo(veiculoHeader header) {
     printf("descreveModelo: %s\n", header.descreveModelo);
     printf("descreveCategoria: %s\n", header.descreveCategoria);
     printf("====================\n");
+}
+
+void imprimeData(char* stringData) {
+    printf("Data de entrada do veiculo na frota: ");
+
+    if (stringData[0] != '\0') {
+        int indiceDoMes = (stringData[5] - '0') * 10 + (stringData[6] - '0') -1;  // calcula o indice do mes e translada para entre 0-11
+        printf("%.2s de %s de %.4s\n", stringData + 8,MESES[indiceDoMes],stringData);
+    } else {
+        printf("campo com valor nulo\n");
+    }
 }
 
 void CreateTable_Veiculo(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
@@ -56,7 +73,32 @@ void CreateTable_Veiculo(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
     binarioNaTela(nomeArquivoBin);
 }
 
-int lerVeiculo(FILE* arquivoCSV, veiculo *novoVeiculo) {
+void SelectFrom_Veiculo(char nomeArquivoBin[100]) {
+    FILE* arquivoBin = abrirBinario(nomeArquivoBin);
+
+    if (arquivoBin == NULL) {
+        printf("Falha no processamento do arquivo.");
+        return;
+    }
+
+    veiculoHeader novoHeader;
+    veiculo novoVeiculo;
+
+    lerHeaderBin_Veiculo(arquivoBin, &novoHeader);
+    novoHeader.status = '0';
+    // imprimeHeader_Veiculo(novoHeader);
+    salvaHeader_Veiculo(arquivoBin, &novoHeader);
+    int finalDoArquivo = 0;
+
+    while (!finalDoArquivo) {
+        finalDoArquivo = lerVeiculo_Bin(arquivoBin, &novoVeiculo);
+        if (novoVeiculo.removido == '1') imprimeVeiculo(novoVeiculo);
+    }
+    novoHeader.status = '1';
+    salvaHeader_Veiculo(arquivoBin, &novoHeader);
+
+    fclose(arquivoBin);
+}
 
 int lerVeiculo_CSV(FILE* arquivoCSV, veiculo* novoVeiculo) {
     int tamanhoRegistro = 0;
@@ -111,8 +153,8 @@ void imprimeVeiculo(veiculo currVeiculo) {
 
 }
 
-void salvaVeiculo(FILE* arquivoBin, veiculo* currV,veiculoHeader* header) {
-    fseek(arquivoBin,header->byteProxReg,SEEK_SET);
+void salvaVeiculo(FILE* arquivoBin, veiculo* currV, veiculoHeader* header) {
+    fseek(arquivoBin, header->byteProxReg, SEEK_SET);
 
     fwrite(&currV->removido, sizeof(char), 1, arquivoBin);
     fwrite(&currV->tamanhoRegistro, sizeof(int), 1, arquivoBin);
@@ -122,14 +164,15 @@ void salvaVeiculo(FILE* arquivoBin, veiculo* currV,veiculoHeader* header) {
     fwrite(&currV->codLinha, sizeof(int), 1, arquivoBin);
 
     fwrite(&currV->tamanhoModelo, sizeof(int), 1, arquivoBin);
-    fwrite(&currV->modelo, sizeof(char), currV->tamanhoModelo,arquivoBin);
+    fwrite(&currV->modelo, sizeof(char), currV->tamanhoModelo, arquivoBin);
 
     fwrite(&currV->tamanhoCategoria, sizeof(int), 1, arquivoBin);
-    fwrite(&currV->categoria, sizeof(char), currV->tamanhoCategoria,arquivoBin);
+    fwrite(&currV->categoria, sizeof(char), currV->tamanhoCategoria,
+           arquivoBin);
 
-	header->byteProxReg = ftell(arquivoBin);
-	header->nroRegRemovidos += (currV->removido == '0')? 1:0;
-	header->nroRegistros += (currV->removido == '0')? 0:1;
+    header->byteProxReg = ftell(arquivoBin);
+    header->nroRegRemovidos += (currV->removido == '0') ? 1 : 0;
+    header->nroRegistros += (currV->removido == '0') ? 0 : 1;
 }
 
 void lerHeaderCSV_Veiculo(FILE* arquivoCSV, veiculoHeader* header) {
@@ -142,21 +185,18 @@ void lerHeaderCSV_Veiculo(FILE* arquivoCSV, veiculoHeader* header) {
 }
 
 void lerHeaderBin_Veiculo(FILE* arquivoBin, veiculoHeader* header) {
-    long int currPos = ftell(arquivoBin);
-    fseek(arquivoBin, 0, 0);
+    fseek(arquivoBin, 0, SEEK_SET);
 
     fread(&header->status, sizeof(char), 1, arquivoBin);
     fread(&header->byteProxReg, sizeof(long int), 1, arquivoBin);
     fread(&header->nroRegistros, sizeof(int), 1, arquivoBin);
     fread(&header->nroRegRemovidos, sizeof(int), 1, arquivoBin);
-    fread(&header->descrevePrefixo, 18, 1, arquivoBin);
-    fread(&header->descreveData, 35, 1, arquivoBin);
-    fread(&header->descreveLugares, 42, 1, arquivoBin);
-    fread(&header->descreveLinha, 26, 1, arquivoBin);
-    fread(&header->descreveModelo, 17, 1, arquivoBin);
-    fread(&header->descreveCategoria, 20, 1, arquivoBin);
-
-    fseek(arquivoBin, currPos, 0);
+    fread(&header->descrevePrefixo, sizeof(char), 18, arquivoBin);
+    fread(&header->descreveData, sizeof(char), 35, arquivoBin);
+    fread(&header->descreveLugares, sizeof(char), 42, arquivoBin);
+    fread(&header->descreveLinha, sizeof(char), 26, arquivoBin);
+    fread(&header->descreveModelo, sizeof(char), 17, arquivoBin);
+    fread(&header->descreveCategoria, sizeof(char), 20, arquivoBin);
 }
 
 void salvaHeader_Veiculo(FILE* arquivoBin, veiculoHeader* header) {
