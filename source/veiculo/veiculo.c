@@ -144,9 +144,9 @@ void lerHeaderBin_Veiculo(FILE* arquivoBin, veiculoHeader* header) {
     fseek(arquivoBin, currPos, 0);
 }
 
-void salvaHeaderCSV_Veiculo(FILE* arquivoBin, veiculoHeader* header) {
+void salvaHeader_Veiculo(FILE* arquivoBin, veiculoHeader* header) {
     fseek(arquivoBin, 0, 0);
-	imprimeHeader_Veiculo(*header);
+
     fwrite(&header->status, sizeof(char), 1, arquivoBin);
     fwrite(&(header->byteProxReg), sizeof(long int), 1, arquivoBin);
     fwrite(&(header->nroRegistros), sizeof(int), 1, arquivoBin);

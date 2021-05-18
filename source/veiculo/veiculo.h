@@ -35,7 +35,7 @@ void imprimeVeiculo(veiculo currVeiculo);
 void salvaVeiculo(FILE* arquivoBin, veiculo* currVeiculo,veiculoHeader* header);
 void lerHeaderCSV_Veiculo(FILE* arquivoCSV, veiculoHeader *header);
 void lerHeaderBin_Veiculo(FILE* arquivoBin, veiculoHeader *header);
-void salvaHeaderCSV_Veiculo(FILE* arquivoBin, veiculoHeader *header);
+void salvaHeader_Veiculo(FILE* arquivoBin, veiculoHeader *header);
 
 
 
