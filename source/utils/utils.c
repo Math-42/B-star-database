@@ -5,10 +5,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-FILE* abrirBinario(char nomeDoArquivo[100]) {
-    FILE* arquivo = fopen(nomeDoArquivo, "wb+");
-    return arquivo;
-}
+
 
 void lerStringFixa_CSV(FILE* arquivo, char* string, int tamanho) {
     fread(string, sizeof(char), tamanho, arquivo);
@@ -21,6 +18,29 @@ int finalDoArquivo(FILE* arquivo){
     isFinal = (fread(&finalByte,sizeof(char),1,arquivo)==0)? 1:0;
     if(!isFinal) fseek(arquivo,-1,SEEK_CUR);
     return isFinal;
+}
+
+char* ajustaString(char* string) {
+    return (string[0] == '\0') ? "campo com valor nulo" : string;
+}
+
+void imprimeInteiro(int inteiro){
+    if(inteiro == -1){
+        printf("campo com valor nulo\n");
+    } else {
+        printf("%d\n",inteiro);
+    }
+}
+
+void imprimirCampo(char* descricao, void* valor, int isInt){
+    if(isInt >0){
+        int* valorInteiro =  (int*)valor;
+        printf("%s: ",descricao);
+        imprimeInteiro(*valorInteiro);
+    } else {
+        char* valorString =  (char*)valor;
+        printf("%s: %s\n",descricao,ajustaString(valorString));
+    }
 }
 
 // FUNCOES FORNECIDAS PELOS MONITORES
