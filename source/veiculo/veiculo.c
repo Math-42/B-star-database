@@ -24,6 +24,11 @@ void CreateTable_Veiculo(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
     FILE* arquivoBin = abrirBinario(nomeArquivoBin);
     FILE* arquivoCSV = abrirCSV(nomeArquivoCSV);
 
+    if (arquivoCSV == NULL) {
+        printf("Falha no processamento do arquivo.");
+        return;
+    }
+
     veiculoHeader novoHeader;
     veiculo novoVeiculo;
     int finalDoArquivo = 0;
@@ -34,17 +39,17 @@ void CreateTable_Veiculo(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
     novoHeader.nroRegRemovidos = 0;
 
     lerHeaderCSV_Veiculo(arquivoCSV, &novoHeader);
-	salvaHeaderCSV_Veiculo(arquivoBin, &novoHeader);
+    salvaHeader_Veiculo(arquivoBin, &novoHeader);
 
-    while(!finalDoArquivo) {
-        finalDoArquivo = lerVeiculo(arquivoCSV,&novoVeiculo);
+    while (!finalDoArquivo) {
+        finalDoArquivo = lerVeiculo_CSV(arquivoCSV, &novoVeiculo);
         salvaVeiculo(arquivoBin, &novoVeiculo, &novoHeader);
     }
 
-	novoHeader.status = '1';
+    novoHeader.status = '1';
 
-    salvaHeaderCSV_Veiculo(arquivoBin, &novoHeader);
-    
+    salvaHeader_Veiculo(arquivoBin, &novoHeader);
+
     fclose(arquivoBin);
     fclose(arquivoCSV);
 
