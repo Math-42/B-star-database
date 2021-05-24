@@ -7,11 +7,6 @@
 
 
 
-void lerStringFixa_CSV(FILE* arquivo, char* string, int tamanho) {
-    fread(string, sizeof(char), tamanho, arquivo);
-    fseek(arquivo, 1, SEEK_CUR);  // Pula a virgula
-}
-
 int finalDoArquivo(FILE* arquivo){
     int isFinal = 0;
     char finalByte;
