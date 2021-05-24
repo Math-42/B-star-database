@@ -38,8 +38,8 @@ void imprimeData(char* stringData) {
 }
 
 void CreateTable_Veiculo(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
-    FILE* arquivoBin = abrirBinario(nomeArquivoBin);
-    FILE* arquivoCSV = abrirCSV(nomeArquivoCSV);
+    FILE* arquivoBin = fopen(nomeArquivoBin,"wb");
+    FILE* arquivoCSV = fopen(nomeArquivoCSV,"r");
 
     if (arquivoCSV == NULL) {
         printf("Falha no processamento do arquivo.");
