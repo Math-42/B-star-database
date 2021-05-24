@@ -1,19 +1,13 @@
 #include "csv.h"
 #include <stdio.h>
+#include "../utils/utils.h"
 
-FILE* abrirCSV(char nomeDoArquivo[100]) {
-    FILE* arquivo = fopen(nomeDoArquivo, "r");
-    return arquivo;
-}
-
-int stringToInt(char string[11], int tamanho){
-	int valorLido = 0;
-	for (int i = 0; i < tamanho; i++) {
-        valorLido = valorLido * 10 + (string[i] - '0');
-    }
-	return valorLido;
-}
-
+/**
+ * Lê um campo CSV byte a byte
+ * @param arquivo arquivo a ser lido
+ * @param string string onde o conteúdo será salvo
+ * @return tamanho do campo lido
+ */
 int lerByteAByte(FILE* arquivo, char* string){
 	int posicao = -1;
     
@@ -25,6 +19,11 @@ int lerByteAByte(FILE* arquivo, char* string){
     return posicao;
 }
 
+/**
+ * Testa se o valor lido é equivalente a NULO
+ * @param string string a ser testada
+ * @return 1 para válido e 0 para inválido
+ */
 int validarValorLido(char string[11]) {
     if (string[0] == 'N' && string[1] == 'U' && string[2] == 'L' &&
         string[3] == 'O') {
@@ -33,6 +32,12 @@ int validarValorLido(char string[11]) {
     return 1;
 }
 
+/**
+ * Lê um campo de string do csv e adiciona \0 no final
+ * @param arquivo arquivo a ser lido
+ * @param string local onde o conteudo será salvo
+ * @return retorna o tamanho da string lida
+ */
 int lerString(FILE* arquivo, char* string) {
 	int tamanho = lerByteAByte(arquivo,string);
     if(!validarValorLido(string))tamanho=0;
@@ -40,12 +45,24 @@ int lerString(FILE* arquivo, char* string) {
     return tamanho;
 }
 
+/**
+ * Lê um campo de string do csv de tamanho fixo
+ * @param arquivo arquivo a ser lido
+ * @param string local onde o conteudo será salvo
+ * @param string tamanho máximo aceito
+ * @return retorna o tamanho real da string lida
+ */
 int lerStringFixa(FILE* arquivo, char* string,int tamanhoMaximo) {
     int tamanhoReal = lerString(arquivo,string);
-    for(int i=tamanhoReal+1;i<tamanhoMaximo;i++)string[i]= '@';//completa de @ após o \0
+    for(int i=tamanhoReal+1;i<tamanhoMaximo;i++)string[i]= '@';//completa de @ após o \0 caso necessário
     return tamanhoReal;
 }
 
+/**
+ * Testa se um campo do CSV foi removido ou não
+ * @param arquivo arquivo a ser analisado
+ * @return retorna '0' para removido e '1' para não removido
+ */
 char foiRemovido(FILE* arquivo){
     char primeiroChar;
     fread(&primeiroChar, sizeof(char), 1, arquivo);
@@ -54,6 +71,11 @@ char foiRemovido(FILE* arquivo){
     return primeiroChar;
 }
 
+/**
+ * Lê um campo de inteiro de um CSV
+ * @param arquivo arquivo a ser analisado
+ * @return retorna o próprio valor lido ou -1 caso seja nulo
+ */
 int lerInteiro(FILE* arquivo) {
     char string[11];  // tamanho do maior inteiro possivel
 
