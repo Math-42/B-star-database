@@ -5,8 +5,26 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+/**
+ * Transforma um inteiro no formato string em um inteiro
+ * @param string string inicial
+ * @param tamanho quantidade de digitos do número
+ * @return inteiro convertido
+ */
+int stringToInt(char string[11], int tamanho){
+	int valorLido = 0;
+	for (int i = 0; i < tamanho; i++) {
+        valorLido = valorLido * 10 + (string[i] - '0');
+    }
+	return valorLido;
+}
 
-
+/**
+ * Determina se é o final do arquivo sem alterar a posição do ponteiro
+ * caso não seja
+ * @param arquivo arquivo a ser lido
+ * @return retorna 1 caso seja o final e 0 caso não seja
+ */
 int finalDoArquivo(FILE* arquivo){
     int isFinal = 0;
     char finalByte;
@@ -15,10 +33,19 @@ int finalDoArquivo(FILE* arquivo){
     return isFinal;
 }
 
+/**
+ * Determina se uma string é nula, ou seja, se já começa com \0
+ * @param string string a ser analisada
+ * @return retorna a própria string ou uma string padrão caso seja nula
+ */
 char* ajustaString(char* string) {
     return (string[0] == '\0') ? "campo com valor nulo" : string;
 }
 
+/**
+ * Imprime um inteiro ou campo com valor nulo caso ele seja -1
+ * @param inteiro inteiro a ser analisada
+ */
 void imprimeInteiro(int inteiro){
     if(inteiro == -1){
         printf("campo com valor nulo\n");
@@ -27,6 +54,13 @@ void imprimeInteiro(int inteiro){
     }
 }
 
+/**
+ * Imprime um campo de um registro
+ * @param descricao descrição do campo
+ * @param valor ponteiro para o valor que será impresso
+ * @param isInt determina se o valor a ser impresso é inteiro ou string, sendo > 0 para
+ * @return retorna a própria string ou uma string padrão caso seja nula
+ */
 void imprimirCampo(char* descricao, void* valor, int isInt){
     if(isInt >0){
         int* valorInteiro =  (int*)valor;

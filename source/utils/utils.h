@@ -6,5 +6,6 @@ int finalDoArquivo(FILE* arquivo);
 void imprimirCampo(char* descricao, void* valor, int isInt);
 void binarioNaTela(char *nomeArquivoBinario);
 void scan_quote_string(char *str);
+int stringToInt(char string[11], int tamanho);
 
 #endif
