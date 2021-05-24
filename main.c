@@ -2,26 +2,55 @@
 #include <stdlib.h>
 #include "source/veiculo/veiculo.h"
 #include "source/linha/linha.h"
+#include "source/utils/utils.h"
 
-void menu(int funcionalidade) {
+void menu() {
+	int funcionalidade;
+	char arquivoCSV[100];
+	char arquivoBin[100];
+	char nomeDoCampo[100];
+	char valor[100];
+	scanf("%d",&funcionalidade);
 	switch (funcionalidade){
 	case 1:
-		CreateTable_Veiculo("casosDeTeste/csv/veiculo.csv","casosDeTeste/out/veiculo.bin");
+		scanf("%s %s", arquivoCSV, arquivoBin);
+		CreateTable_Veiculo(arquivoCSV,arquivoBin);
 		return;
 		break;
 	case 2:
-		CreateTable_Linha("casosDeTeste/teste/linha3.csv","casosDeTeste/out/linha3.bin");
+		scanf("%s %s", arquivoCSV, arquivoBin);
+		CreateTable_Linha(arquivoCSV,arquivoBin);
 		return;
 		break;
 	case 3:
-		SelectFrom_Veiculo("casosDeTeste/teste/veiculo5.bin");
+		scanf("%s", arquivoBin);
+		SelectFrom_Veiculo(arquivoBin);
 		return;
 		break;
 	case 4:
-		SelectFrom_Linha("casosDeTeste/teste/linha7.bin");
+		scanf("%s", arquivoBin);
+		SelectFrom_Linha(arquivoBin);
 		return;
 		break;
-	
+	case 5:
+		scanf("%s", arquivoBin);
+		scanf("%s", nomeDoCampo);
+		scan_quote_string(valor);
+		SelectFromWhere_Veiculo(arquivoBin,nomeDoCampo,valor);
+		return;
+		break;
+	case 6:
+		
+		return;
+		break;
+	case 7:
+		
+		return;
+		break;
+	case 8:
+		
+		return;
+		break;
 	default:
 		break;
 	}
