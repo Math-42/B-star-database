@@ -75,19 +75,23 @@ void CreateTable_Linha(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
 }
 
 void SelectFrom_Linha(char nomeArquivoBin[100]) {
-    FILE* arquivoBin = abrirBinario(nomeArquivoBin);
+    FILE* arquivoBin = fopen(nomeArquivoBin,"rb");
+    linhaHeader novoHeader;
+    linha novoLinha;
 
     if (arquivoBin == NULL) {
         printf("Falha no processamento do arquivo.");
         return;
     }
-
-    linhaHeader novoHeader;
-    linha novoLinha;
-
+    
     lerHeaderBin_Linha(arquivoBin, &novoHeader);
+
+    if (novoHeader.nroRegistros == 0) {
+        printf("Registro inexistente.");
+        return;
+    }
+
     novoHeader.status = '0';
-    // imprimeHeader_Linha(novoHeader);
     salvaHeader_Linha(arquivoBin, &novoHeader);
     int finalDoArquivo = 0;
 
