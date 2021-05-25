@@ -72,6 +72,30 @@ void imprimirCampo(char* descricao, void* valor, int isInt){
     }
 }
 
+/**
+ * lê uma string do terminal considerando campos nulos
+ * @param string string onde o dado será salvo
+ * @return retorna o tamanho da string lida
+ */
+int lerStringTerminal(char string[100]){
+    scan_quote_string(string);
+    int tamanho = (int)strlen(string);
+    string[tamanho] = '\0';
+    return tamanho;
+}
+
+/**
+ * Lê um campo de string do terminal de tamanho fixo considerando campos nulos
+ * @param string local onde o conteudo será salvo
+ * @param tamanhoMaximo tamanho máximo aceito
+ * @return retorna o tamanho real da string lida
+ */
+int lerStringTerminalFixa(char* string,int tamanhoMaximo) {
+    int tamanhoReal = lerStringTerminal(string);
+    for(int i=tamanhoReal+1;i<tamanhoMaximo;i++)string[i]= '@';//completa de @ após o \0 caso necessário
+    return tamanhoReal;
+}
+
 // FUNCOES FORNECIDAS PELOS MONITORES
 void binarioNaTela(char *nomeArquivoBinario) { /* Você não precisa entender o código dessa função. */
 
