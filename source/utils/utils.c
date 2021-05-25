@@ -13,7 +13,7 @@
  */
 int stringToInt(char string[11], int tamanho){
 	int valorLido = 0;
-	for (int i = 0; i < tamanho; i++) {
+	for (int i = 0; i < tamanho; i++) {//percorre cada digito transformando em int
         valorLido = valorLido * 10 + (string[i] - '0');
     }
 	return valorLido;
@@ -29,7 +29,7 @@ int finalDoArquivo(FILE* arquivo){
     int isFinal = 0;
     char finalByte;
     isFinal = (fread(&finalByte,sizeof(char),1,arquivo)==0)? 1:0;
-    if(!isFinal) fseek(arquivo,-1,SEEK_CUR);
+    if(!isFinal) fseek(arquivo,-1,SEEK_CUR);//volta 1 byte caso não esteja no final
     return isFinal;
 }
 
@@ -62,7 +62,7 @@ void imprimeInteiro(int inteiro){
  * @return retorna a própria string ou uma string padrão caso seja nula
  */
 void imprimirCampo(char* descricao, void* valor, int isInt){
-    if(isInt >0){
+    if(isInt >0){//testa se o valor recebido é inteiro ou não
         int* valorInteiro =  (int*)valor;
         printf("%s: ",descricao);
         imprimeInteiro(*valorInteiro);

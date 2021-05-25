@@ -5,38 +5,34 @@
 #include "../csv/csv.h"
 #include "../utils/utils.h"
 
-void imprimeHeader_Linha(linhaHeader header) {
-    printf("Imprimindo header linha: \n");
-    printf("status: %c \n", header.status);
-    printf("byteProxReg: %ld\n", header.byteProxReg);
-    printf("nroRegistros: %d\n", header.nroRegistros);
-    printf("nroRegRemovidos: %d\n", header.nroRegRemovidos);
-    printf("descreveCodigo: %s\n", header.descreveCodigo);
-    printf("descreveCartao: %s\n", header.descreveCartao);
-    printf("descreveNome: %s\n", header.descreveNome);
-    printf("descreveLinha: %s\n", header.descreveLinha);
-    printf("====================\n");
-}
-
+/**
+ * Imprime o tipo de pagamento no cartão no formato solicitado
+ * @param stringData string original no formato salvo
+ */
 void imprimirCartao(char* cartao){
     printf("Aceita cartao: ");
     switch (cartao[0]){
-    case 'S':
-        printf("PAGAMENTO SOMENTE COM CARTAO SEM PRESENCA DE COBRADOR");
-        break;
-    case 'N':
-        printf("PAGAMENTO EM CARTAO E DINHEIRO");
-        break;
-    case 'F':
-        printf("PAGAMENTO EM CARTAO SOMENTE NO FINAL DE SEMANA");
-        break;
-    default:
-        printf("campo com valor nulo");
-        break;
+        case 'S':
+            printf("PAGAMENTO SOMENTE COM CARTAO SEM PRESENCA DE COBRADOR");
+            break;
+        case 'N':
+            printf("PAGAMENTO EM CARTAO E DINHEIRO");
+            break;
+        case 'F':
+            printf("PAGAMENTO EM CARTAO SOMENTE NO FINAL DE SEMANA");
+            break;
+        default:
+            printf("campo com valor nulo");
+            break;
     }
     printf("\n");
 }
 
+/**
+ * Cria um arquivo binário na estrutura solicitada de header e campos a partir de um arquivo CSV
+ * @param nomeArquivoCSV nome do arquivo csv fonte dos dados
+ * @param nomeArquivoBin nome do arquivo binário onde os dados serão salvos
+ */
 void CreateTable_Linha(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
     FILE* arquivoBin = fopen(nomeArquivoBin,"wb");
     FILE* arquivoCSV = fopen(nomeArquivoCSV,"r");
@@ -47,9 +43,10 @@ void CreateTable_Linha(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
     }
 
     linhaHeader novoHeader;
-    linha novoLinha;
+    linha novaLinha;
     int finalDoArquivo = 0;
 
+    //valores iniciais do header
     novoHeader.status = '0';
     novoHeader.byteProxReg = 82;
     novoHeader.nroRegistros = 0;
@@ -59,8 +56,8 @@ void CreateTable_Linha(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
     salvaHeader_Linha(arquivoBin, &novoHeader);
 
     while (!finalDoArquivo) {
-        finalDoArquivo = lerLinha_CSV(arquivoCSV, &novoLinha);
-        salvaLinha(arquivoBin, &novoLinha, &novoHeader);
+        finalDoArquivo = lerLinha_CSV(arquivoCSV, &novaLinha);
+        salvaLinha(arquivoBin, &novaLinha, &novoHeader);
     }
     
 
@@ -74,10 +71,14 @@ void CreateTable_Linha(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
     binarioNaTela(nomeArquivoBin);
 }
 
+/**
+ * Imprime todos os valores de um binário
+ * @param nomeArquivoBin nome do arquivo binário de onde os dados serão lidos
+ */
 void SelectFrom_Linha(char nomeArquivoBin[100]) {
     FILE* arquivoBin = fopen(nomeArquivoBin,"rb");
     linhaHeader novoHeader;
-    linha novoLinha;
+    linha novaLinha;
 
     if (arquivoBin == NULL) {
         printf("Falha no processamento do arquivo.");
@@ -85,6 +86,11 @@ void SelectFrom_Linha(char nomeArquivoBin[100]) {
     }
     
     lerHeaderBin_Linha(arquivoBin, &novoHeader);
+
+    if (novoHeader.status == 0) {
+        printf("Falha no processamento do arquivo.");
+        return;
+    }
 
     if (novoHeader.nroRegistros == 0) {
         printf("Registro inexistente.");
@@ -96,8 +102,8 @@ void SelectFrom_Linha(char nomeArquivoBin[100]) {
     int finalDoArquivo = 0;
 
     while (!finalDoArquivo) {
-        finalDoArquivo = lerLinha_Bin(arquivoBin, &novoLinha);
-        if (novoLinha.removido == '1') imprimeLinha(novoLinha);
+        finalDoArquivo = lerLinha_Bin(arquivoBin, &novaLinha);
+        if (novaLinha.removido == '1') imprimeLinha(novaLinha);
     }
     novoHeader.status = '1';
     salvaHeader_Linha(arquivoBin, &novoHeader);
@@ -105,77 +111,107 @@ void SelectFrom_Linha(char nomeArquivoBin[100]) {
     fclose(arquivoBin);
 }
 
-int lerLinha_CSV(FILE* arquivoCSV, linha* novoLinha) {
+/**
+ * Lê um registro de uma linha do arquivo CSV lidando com campos nulos e os tamanhos
+ * de registro total e dos campos variaveis
+ * @param arquivoCSV nome do arquivo csv fonte dos dados
+ * @param novaLinha variavel para salvar os dados
+ * @return retorna 1 caso for o utimo registro e 0 caso contrário
+ */
+int lerLinha_CSV(FILE* arquivoCSV, linha* novaLinha) {
     int tamanhoRegistro = 0;
 
-    novoLinha->removido = foiRemovido(arquivoCSV);
+    novaLinha->removido = foiRemovido(arquivoCSV);
 
-    novoLinha->codLinha = lerInteiro(arquivoCSV);
+    novaLinha->codLinha = lerInteiro(arquivoCSV);
 
-    lerStringFixa(arquivoCSV, novoLinha->aceitaCartao, 1);
+    lerStringFixa(arquivoCSV, novaLinha->aceitaCartao, 1);
 
-    int tamanhoNome = lerString(arquivoCSV, novoLinha->nomeLinha);
-    int tamanhoCor = lerString(arquivoCSV, novoLinha->corLinha);
+    int tamanhoNome = lerString(arquivoCSV, novaLinha->nomeLinha);
+    int tamanhoCor = lerString(arquivoCSV, novaLinha->corLinha);
 
 
     tamanhoRegistro += tamanhoNome + tamanhoCor;
     tamanhoRegistro += 13;  // tamanho da parte fixa da struct
 
-    novoLinha->tamanhoNome = tamanhoNome;
-    novoLinha->tamanhoCor = tamanhoCor;
-    novoLinha->tamanhoRegistro = tamanhoRegistro;
+    novaLinha->tamanhoNome = tamanhoNome;
+    novaLinha->tamanhoCor = tamanhoCor;
+    novaLinha->tamanhoRegistro = tamanhoRegistro;
 
     return finalDoArquivo(arquivoCSV);
 }
 
-int lerLinha_Bin(FILE* arquivoBin, linha* currV) {
+/**
+ * Lê um registro de linha do arquivo binário lidando com campos nulos e os tamanhos
+ * de registro total e dos campos variaveis
+ * @param arquivoBin nome do arquivo binário fonte dos dados
+ * @param currL variavel para salvar os dados
+ * @return retorna 1 caso for o utimo registro e 0 caso contrário
+ */
+int lerLinha_Bin(FILE* arquivoBin, linha* currL) {
 
-    lerStringBin(arquivoBin, &currV->removido, 1);
+    lerStringBin(arquivoBin, &currL->removido, 1);
 
-    currV->tamanhoRegistro = lerInteiroBin(arquivoBin);
-    currV->codLinha = lerInteiroBin(arquivoBin);
+    currL->tamanhoRegistro = lerInteiroBin(arquivoBin);
+    currL->codLinha = lerInteiroBin(arquivoBin);
 
-    lerStringBin(arquivoBin, currV->aceitaCartao, 1);
+    lerStringBin(arquivoBin, currL->aceitaCartao, 1);
 
-    currV->tamanhoNome = lerInteiroBin(arquivoBin);
-    lerStringBin(arquivoBin, currV->nomeLinha, currV->tamanhoNome);
+    currL->tamanhoNome = lerInteiroBin(arquivoBin);
+    lerStringBin(arquivoBin, currL->nomeLinha, currL->tamanhoNome);
 
-    currV->tamanhoCor = lerInteiroBin(arquivoBin);
-    lerStringBin(arquivoBin, currV->corLinha, currV->tamanhoCor);
+    currL->tamanhoCor = lerInteiroBin(arquivoBin);
+    lerStringBin(arquivoBin, currL->corLinha, currL->tamanhoCor);
 
     return finalDoArquivo(arquivoBin);
 }
 
+/**
+ * Imprime os campos de uma linha conforme a formatação requisitada
+ * @param currLinha linha a ser impressa
+ */
 void imprimeLinha(linha currLinha) {
 
     imprimirCampo("Codigo da linha",&currLinha.codLinha,1);
     imprimirCampo("Nome da linha",currLinha.nomeLinha,0);
     imprimirCampo("Cor que descreve a linha",currLinha.corLinha,0);
-    imprimirCartao(currLinha.aceitaCartao);
+    imprimirCartao(currLinha.aceitaCartao);//o cartão recebe um tratamento diferente devido as excessões
 
     printf("\n");
 
 }
 
-void salvaLinha(FILE* arquivoBin, linha* currV, linhaHeader* header) {
+/**
+ * Salva uma nova linha em um arquivo binário na posição indicada pelo header
+ * e atualiza quantidade de registros e próxima prosição de salvamento
+ * @param arquivoBin arquivo onde o veiculo será salvo
+ * @param currL veicuo que será salvo
+ * @param header header do arquivo binário
+ */
+void salvaLinha(FILE* arquivoBin, linha* currL, linhaHeader* header) {
     fseek(arquivoBin, header->byteProxReg, SEEK_SET);
 
-    fwrite(&currV->removido, sizeof(char), 1, arquivoBin);
-    fwrite(&currV->tamanhoRegistro, sizeof(int), 1, arquivoBin);
-    fwrite(&currV->codLinha, sizeof(int), 1, arquivoBin);
-    fwrite(&currV->aceitaCartao, sizeof(char), 1, arquivoBin);
+    fwrite(&currL->removido, sizeof(char), 1, arquivoBin);
+    fwrite(&currL->tamanhoRegistro, sizeof(int), 1, arquivoBin);
+    fwrite(&currL->codLinha, sizeof(int), 1, arquivoBin);
+    fwrite(&currL->aceitaCartao, sizeof(char), 1, arquivoBin);
 
-    fwrite(&currV->tamanhoNome, sizeof(int), 1, arquivoBin);
-    fwrite(&currV->nomeLinha, sizeof(char), currV->tamanhoNome, arquivoBin);
+    fwrite(&currL->tamanhoNome, sizeof(int), 1, arquivoBin);
+    fwrite(&currL->nomeLinha, sizeof(char), currL->tamanhoNome, arquivoBin);
 
-    fwrite(&currV->tamanhoCor, sizeof(int), 1, arquivoBin);
-    fwrite(&currV->corLinha, sizeof(char), currV->tamanhoCor,arquivoBin);
+    fwrite(&currL->tamanhoCor, sizeof(int), 1, arquivoBin);
+    fwrite(&currL->corLinha, sizeof(char), currL->tamanhoCor,arquivoBin);
 
     header->byteProxReg = ftell(arquivoBin);
-    header->nroRegRemovidos += (currV->removido == '0') ? 1 : 0;
-    header->nroRegistros += (currV->removido == '0') ? 0 : 1;
+    header->nroRegRemovidos += (currL->removido == '0') ? 1 : 0;
+    header->nroRegistros += (currL->removido == '0') ? 0 : 1;
 }
 
+/**
+ * Lê o header do CSV e salva em uma variável
+ * @param arquivoCSV arquivo de onde o header será lido
+ * @param header header onde será salvo
+ */
 void lerHeaderCSV_Linha(FILE* arquivoCSV, linhaHeader* header) {
     lerString(arquivoCSV, header->descreveCodigo);
     lerString(arquivoCSV, header->descreveCartao);
@@ -183,6 +219,11 @@ void lerHeaderCSV_Linha(FILE* arquivoCSV, linhaHeader* header) {
     lerString(arquivoCSV, header->descreveLinha);
 }
 
+/**
+ * Lê o header de um arquivo binário
+ * @param arquivoBin arquivo de onde será lido
+ * @param header variável onde o header será salvo
+ */
 void lerHeaderBin_Linha(FILE* arquivoBin, linhaHeader* header) {
     fseek(arquivoBin, 0, SEEK_SET);
 
@@ -196,6 +237,11 @@ void lerHeaderBin_Linha(FILE* arquivoBin, linhaHeader* header) {
     fread(&(header->descreveLinha), sizeof(char), 24, arquivoBin);
 }
 
+/**
+ * Salva o header em um arquivo binário
+ * @param arquivoBin arquivo de onde será salvo
+ * @param header header que será salvo
+ */
 void salvaHeader_Linha(FILE* arquivoBin, linhaHeader* header) {
     fseek(arquivoBin, 0, 0);
 
