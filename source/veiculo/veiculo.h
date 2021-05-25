@@ -41,6 +41,6 @@ void salvaHeader_Veiculo(FILE* arquivoBin, veiculoHeader *header);
 void SelectFrom_Veiculo(char nomeArquivoBin[100]);
 void CreateTable_Veiculo(char nomeArquivoCSV[100], char nomeArquivoBin[100]);
 void SelectFromWhere_Veiculo(char nomeArquivoBin[100], char* campo, char*valor);
-void InsertInto_Veiculo(char nomeArquivoBin[100]);
+void InsertInto_Veiculo(char nomeArquivoBin[100], int numeroDeEntradas);
 
 #endif

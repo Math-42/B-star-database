@@ -112,7 +112,7 @@ void SelectFrom_Veiculo(char nomeArquivoBin[100]) {
         printf("Registro inexistente.");
         return;
     }
-
+    
     novoHeader.status = '0';
     salvaHeader_Veiculo(arquivoBin, &novoHeader);
     int finalDoArquivo = 0;
@@ -231,7 +231,7 @@ void SelectFromWhere_Veiculo(char nomeArquivoBin[100], char* campo, char* valor)
  *  no fim do binário
  * @param nomeArquivoBIn nome do arquivo binário onde os valores serão salvos
  */
-void InsertInto_Veiculo(char nomeArquivoBin[100]) {
+void InsertInto_Veiculo(char nomeArquivoBin[100], int numeroDeEntradas) {
     FILE* arquivoBin = fopen(nomeArquivoBin, "rb+");
     veiculo novoVeiculo;
     veiculoHeader header;
@@ -247,61 +247,37 @@ void InsertInto_Veiculo(char nomeArquivoBin[100]) {
     lerHeaderBin_Veiculo(arquivoBin, &header);
 
     if (header.status == 0) {
-        printf("Falha no processamento do arquivo.1");
-        return;
-    }
-
-    if (header.nroRegistros == 0) {
-        printf("Registro inexistente.0");
+        printf("Falha no processamento do arquivo.");
         return;
     }
 
     header.status = '0';
     salvaHeader_Veiculo(arquivoBin, &header);
 
-    novoVeiculo.tamanhoRegistro = 0;
-    novoVeiculo.removido = '1';
+    while (numeroDeEntradas--){    
+        
+        novoVeiculo.tamanhoRegistro = 0;
+        novoVeiculo.removido = '1';
 
-    for (int i = 0; i < 6; i++)  // trata o lixo na string de tam fixo
-        string[i] = '@';
-    scan_quote_string(string);
-    string[(int)strlen(string)] = '\0';
-    novoVeiculo.tamanhoRegistro += (int)strlen(string);
-    strcpy(novoVeiculo.prefixo,
-           string);  // copio a string obtida em seu campo respectivo do veiculo
+        lerStringTerminalFixa(novoVeiculo.prefixo,5);
+        lerStringTerminalFixa(novoVeiculo.data,10);
 
-    for (int i = 0; i < 11; i++)
-        string[i] = '@';
-    scan_quote_string(string);
-    string[(int)strlen(string)] = '\0';
-    novoVeiculo.tamanhoRegistro += (int)strlen(string);
-    strcpy(novoVeiculo.data, string);
+        scanf("%d", &novoVeiculo.quantidadeLugares);
+        scanf("%d", & novoVeiculo.codLinha);
 
-    scanf("%d", &tmp);
-    novoVeiculo.quantidadeLugares = tmp;
-    novoVeiculo.tamanhoRegistro += 4;
+        novoVeiculo.tamanhoModelo = lerStringTerminal(novoVeiculo.modelo);
+        novoVeiculo.tamanhoCategoria = lerStringTerminal(novoVeiculo.categoria);
 
-    scanf("%d", &tmp);
-    novoVeiculo.codLinha = tmp;
-    novoVeiculo.tamanhoRegistro += 4;
+        novoVeiculo.tamanhoRegistro =  novoVeiculo.tamanhoModelo + novoVeiculo.tamanhoCategoria;
+        novoVeiculo.tamanhoRegistro += 31;  // tamanho da parte fixa da struct
 
-    scan_quote_string(string);
-    string[(int)strlen(string)] = '\0';
-    novoVeiculo.tamanhoModelo += (int)strlen(string);
-    novoVeiculo.tamanhoRegistro += 4 + (int)strlen(string);
-    strcpy(novoVeiculo.modelo, string);
-
-    scan_quote_string(string);
-    string[(int)strlen(string)] = '\0';
-    novoVeiculo.tamanhoCategoria += (int)strlen(string);
-    novoVeiculo.tamanhoRegistro += 4 + (int)strlen(string);
-    strcpy(novoVeiculo.categoria, string);
-
-    imprimeVeiculo2(novoVeiculo);
-    salvaVeiculo(arquivoBin, &novoVeiculo,&header);  // salvo o novo veículo no fim do binário
+        salvaVeiculo(arquivoBin, &novoVeiculo,&header);  // salvo o novo veículo no fim do binário
+    }
 
     header.status = '1';
     salvaHeader_Veiculo(arquivoBin, &header);
+    fclose(arquivoBin);
+    binarioNaTela(nomeArquivoBin);
 }
 
 /**

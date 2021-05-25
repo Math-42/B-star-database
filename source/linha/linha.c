@@ -207,8 +207,8 @@ void SelectFromWhere_Linha(char nomeArquivoBin[100], char* campo, char*valor){
  *  no fim do binário
  * @param nomeArquivoBIn nome do arquivo binário onde os valores serão salvos
  */
-void InsertInto_Linha(char nomeArquivoBin[100]){
-    FILE* arquivoBin = fopen(nomeArquivoBin, "wb");
+void InsertInto_Linha(char nomeArquivoBin[100], int numeroDeEntradas){
+    FILE* arquivoBin = fopen(nomeArquivoBin, "rb+");
     linha novaLinha;
     linhaHeader header;
 
@@ -226,39 +226,25 @@ void InsertInto_Linha(char nomeArquivoBin[100]){
         printf("Falha no processamento do arquivo.");
         return;
     }
+    header.status = '0';
+    salvaHeader_Linha(arquivoBin, &header);
 
-    if (header.nroRegistros == 0) {
-        printf("Registro inexistente.");
-        return;
+    while (numeroDeEntradas--){  
+        novaLinha.tamanhoRegistro = 0;
+        novaLinha.removido = '1';
+
+        scanf("%d", &novaLinha.codLinha);
+
+        lerStringTerminalFixa(novaLinha.aceitaCartao,1);
+
+        novaLinha.tamanhoNome = lerStringTerminal(novaLinha.nomeLinha);
+        novaLinha.tamanhoCor = lerStringTerminal(novaLinha.corLinha);
+
+        novaLinha.tamanhoRegistro += novaLinha.tamanhoNome + novaLinha.tamanhoCor;
+        novaLinha.tamanhoRegistro += 13;  // tamanho da parte fixa da struct
+
+        salvaLinha(arquivoBin, &novaLinha, &header);  // salvo o novo veículo no fim do binário
     }
-
-    novaLinha.tamanhoRegistro = 0;
-    novaLinha.removido = '1';
-
-    scanf("%d", &tmp);
-    novaLinha.codLinha = tmp;
-    novaLinha.tamanhoRegistro += 4;
-
-    for (int i = 0; i < 5; i++)  // trata o lixo na string de tam fixo
-        string[i] = '@';
-    scan_quote_string(string);
-    string[(int)strlen(string)] = '\0';
-    novaLinha.tamanhoRegistro += (int)strlen(string);
-    strcpy(novaLinha.aceitaCartao, string);  // copio a string obtida em seu campo respectivo da linha
-
-    scan_quote_string(string);
-    string[(int)strlen(string)] = '\0';
-    novaLinha.tamanhoNome += (int)strlen(string);
-    novaLinha.tamanhoRegistro += 4 + (int)strlen(string);
-    strcpy(novaLinha.nomeLinha, string);
-
-    scan_quote_string(string);
-    string[(int)strlen(string)] = '\0';
-    novaLinha.tamanhoCor += (int)strlen(string);
-    novaLinha.tamanhoRegistro += 4 + (int)strlen(string);
-    strcpy(novaLinha.corLinha, string);
-
-    salvaLinha(arquivoBin, &novaLinha, &header);  // salvo o novo veículo no fim do binário
 }
 
 /**
