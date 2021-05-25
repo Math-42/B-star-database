@@ -326,7 +326,7 @@ void SelectFromWhere_Veiculo(char nomeArquivoBin[100], char* campo, char* valor)
     else if (strcmp(campo, "categoria") == 0)  // categoria (string)
         headerPos = 5;
 
-    int total = header.nroRegistros;  // numero total de registros de dados
+    int total = header.nroRegistros + header.nroRegRemovidos;  // numero total de registros de dados
     int existePeloMenosUm = 0;
 
     fseek(arquivoBin, 175,0);  // posiciono para o primeiro registro de dados do binario

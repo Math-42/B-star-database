@@ -314,14 +314,14 @@ void SelectFromWhere_Linha(char nomeArquivoBin[100], char* campo, char*valor){
     else if (strcmp(campo, "corLinha") == 0)  // corLinha (string)
         headerPos = 3;
 
-    int total = header.nroRegistros;  // numero total de registros de dados
+    int total = header.nroRegistros + header.nroRegRemovidos;  // numero total de registros de dados
     int existePeloMenosUm = 0;
     
     fseek(arquivoBin, 82, 0);  // posiciono para o primeiro registro de dados do binario
 
     linha linhaTemp; // crio a cada iteração uma linha atribuindo a ela os
                     // valores lido em cada registro do binario
-    
+
     while (total--) {  // percorro todos registros de dados
         lerLinha_Bin(arquivoBin, &linhaTemp);
         int existe = 0;
