@@ -81,14 +81,14 @@ void SelectFrom_Linha(char nomeArquivoBin[100]) {
     linha novaLinha;
 
     if (arquivoBin == NULL) {
-        printf("Falha no processamento do arquivo.");
+        printf("Falha no processamento do arquivo.1");
         return;
     }
     
     lerHeaderBin_Linha(arquivoBin, &novoHeader);
 
     if (novoHeader.status == 0) {
-        printf("Falha no processamento do arquivo.");
+        printf("Falha no processamento do arquivo.2");
         return;
     }
 
@@ -97,16 +97,12 @@ void SelectFrom_Linha(char nomeArquivoBin[100]) {
         return;
     }
 
-    novoHeader.status = '0';
-    salvaHeader_Linha(arquivoBin, &novoHeader);
     int finalDoArquivo = 0;
 
     while (!finalDoArquivo) {
         finalDoArquivo = lerLinha_Bin(arquivoBin, &novaLinha);
         if (novaLinha.removido == '1') imprimeLinha(novaLinha);
     }
-    novoHeader.status = '1';
-    salvaHeader_Linha(arquivoBin, &novoHeader);
 
     fclose(arquivoBin);
 }
@@ -141,8 +137,6 @@ void SelectFromWhere_Linha(char nomeArquivoBin[100], char* campo, char*valor){
         return;
     }
 
-    long int currPos = ftell(arquivoBin);
-
     int headerPos;                      // posição do campo no cabeçalho
     if (strcmp(campo, "codLinha") == 0)  // codLinha (int)
         headerPos = 0;
@@ -155,22 +149,20 @@ void SelectFromWhere_Linha(char nomeArquivoBin[100], char* campo, char*valor){
 
     int total = header.nroRegistros;  // numero total de registros de dados
     int existePeloMenosUm = 0;
-
-    fseek(arquivoBin, 83, 0);  // posiciono para o primeiro registro de dados do binario
+    
+    fseek(arquivoBin, 82, 0);  // posiciono para o primeiro registro de dados do binario
 
     linha linhaTemp; // crio a cada iteração uma linha atribuindo a ela os
                     // valores lido em cada registro do binario
-
+    
     while (total--) {  // percorro todos registros de dados
         lerLinha_Bin(arquivoBin, &linhaTemp);
         int existe = 0;
-        if (linhaTemp.removido == '0')  // veiculo ja removido
-            continue;
+        if (linhaTemp.removido == '0') continue;  // linha ja removida
 
         switch (headerPos) {
             case 0:
                 if (linhaTemp.codLinha == stringToInt(valor, (int)strlen(valor))) {
-                    fseek(arquivoBin, currPos, 0);
                     imprimeLinha(linhaTemp);
                     return;  
                     //como o codLinha é unico pode interromper assim que encontrar o primeiro
@@ -197,7 +189,6 @@ void SelectFromWhere_Linha(char nomeArquivoBin[100], char* campo, char*valor){
 
     if (!existePeloMenosUm)printf("Registro inexistente.\n");  // nenhum registro encontrado
 
-    fseek(arquivoBin, currPos, 0);
     fclose(arquivoBin);
 }
 
@@ -320,8 +311,8 @@ void imprimeLinha(linha currLinha) {
 /**
  * Salva uma nova linha em um arquivo binário na posição indicada pelo header
  * e atualiza quantidade de registros e próxima prosição de salvamento
- * @param arquivoBin arquivo onde o veiculo será salvo
- * @param currL veicuo que será salvo
+ * @param arquivoBin arquivo onde a linha será lida
+ * @param currL variavel onde a linha será salva
  * @param header header do arquivo binário
  */
 void salvaLinha(FILE* arquivoBin, linha* currL, linhaHeader* header) {
