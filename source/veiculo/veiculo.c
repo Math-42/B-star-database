@@ -13,273 +13,6 @@ char MESES[][12] = {"janeiro",  "fevereiro", "março",    "abril",
                     "setembro", "outubro",   "novembro", "dezembro"}; // todos os meses
 
 
-void imprimeVeiculo2(veiculo currVeiculo) {
-    printf("Imprimindo veiculo: \n");
-    printf("removido: %c \n", currVeiculo.removido);
-    printf("tamanhoRegistro: %d\n", currVeiculo.tamanhoRegistro);
-    printf("prefixo: %s\n", currVeiculo.prefixo);
-    printf("data: %s\n", currVeiculo.data);
-    printf("quantidadeLugares: %d\n", currVeiculo.quantidadeLugares);
-    printf("codLinha: %d\n", currVeiculo.codLinha);
-    printf("tamanhoModelo: %d\n", currVeiculo.tamanhoModelo);
-    printf("modelo: %s\n", currVeiculo.modelo);
-    printf("tamanhoCategoria: %d\n", currVeiculo.tamanhoCategoria);
-    printf("categoria: %s\n", currVeiculo.categoria);
-    printf("====================\n");
-}
-
-/**
- * Imprime a data no formato solicitado
- * @param stringData string original no formato salvo
- */
-void imprimeData(char* stringData) {
-    printf("Data de entrada do veiculo na frota: ");
-    if (stringData[0] != '\0') {//testa se a data é nula
-        int indiceDoMes =
-            (stringData[5] - '0') * 10 + (stringData[6] - '0') -1;  // calcula o indice do mes e translada para entre 0-11
-        printf("%.2s de %s de %.4s\n", stringData + 8, MESES[indiceDoMes],stringData);
-    } else {
-        printf("campo com valor nulo\n");
-    }
-}
-
-/**
- * Cria um arquivo binário na estrutura solicitada de header e campos a partir de um arquivo CSV
- * @param nomeArquivoCSV nome do arquivo csv fonte dos dados
- * @param nomeArquivoBIn nome do arquivo binário onde os dados serão salvos
- */
-void CreateTable_Veiculo(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
-    FILE* arquivoBin = fopen(nomeArquivoBin, "wb");
-    FILE* arquivoCSV = fopen(nomeArquivoCSV, "r");
-
-    if (arquivoCSV == NULL) {
-        printf("Falha no processamento do arquivo.");
-        return;
-    }
-
-    veiculoHeader novoHeader;
-    veiculo novoVeiculo;
-    int finalDoArquivo = 0;
-
-    //definindo valores iniciais do header
-    novoHeader.status = '0';
-    novoHeader.byteProxReg = 175;
-    novoHeader.nroRegistros = 0;
-    novoHeader.nroRegRemovidos = 0;
-
-    lerHeaderCSV_Veiculo(arquivoCSV, &novoHeader);
-    salvaHeader_Veiculo(arquivoBin, &novoHeader);
-
-    //percorre o arquivo até o final
-    while (!finalDoArquivo) {
-        finalDoArquivo = lerVeiculo_CSV(arquivoCSV, &novoVeiculo);
-        salvaVeiculo(arquivoBin, &novoVeiculo, &novoHeader);
-    }
-
-    novoHeader.status = '1';
-
-    salvaHeader_Veiculo(arquivoBin, &novoHeader);//finaliza e salva o header
-
-    //fecha todos arquivos abertos
-    fclose(arquivoBin);
-    fclose(arquivoCSV);
-
-    binarioNaTela(nomeArquivoBin);
-}
-
-/**
- * Imprime todos os valores de um binário
- * @param nomeArquivoBIn nome do arquivo binário de onde os dados serão lidos
- */
-void SelectFrom_Veiculo(char nomeArquivoBin[100]) {
-    FILE* arquivoBin = fopen(nomeArquivoBin, "rb");
-    veiculoHeader novoHeader;
-    veiculo novoVeiculo;
-
-    if (arquivoBin == NULL) {
-        printf("Falha no processamento do arquivo.");
-        return;
-    }
-
-    lerHeaderBin_Veiculo(arquivoBin, &novoHeader);
-
-    if (novoHeader.status == 0) {
-        printf("Falha no processamento do arquivo.");
-        return;
-    }
-
-    if (novoHeader.nroRegistros == 0) {
-        printf("Registro inexistente.");
-        return;
-    }
-    
-    novoHeader.status = '0';
-    salvaHeader_Veiculo(arquivoBin, &novoHeader);
-    int finalDoArquivo = 0;
-    //percorre todo o arquivo imprimindo apenas os registros salvos
-    while (!finalDoArquivo) {
-        finalDoArquivo = lerVeiculo_Bin(arquivoBin, &novoVeiculo);
-        if (novoVeiculo.removido == '1') imprimeVeiculo(novoVeiculo);
-    }
-    novoHeader.status = '1';
-    salvaHeader_Veiculo(arquivoBin, &novoHeader);
-
-    fclose(arquivoBin);
-}
-
-/**
- * A busca por um campo em específico é feita pela a
- * varredura da posição do campo correspondente a ser buscado no cabeçalho, após
- * isso percorre os registros todos os dados nessa respectiva posição e então
- * compara com o valor procurado
- * @param nomeArquivoBIn nome do arquivo binário de onde os dados serão lidos
- * @param campo nome do campo onde fara a busca
- * @param valor valor que está sendo buscado
- */
-void SelectFromWhere_Veiculo(char nomeArquivoBin[100], char* campo, char* valor) {
-    FILE* arquivoBin = fopen(nomeArquivoBin, "rb");
-    veiculoHeader header;
-
-    if (arquivoBin == NULL) {
-        printf("Falha no processamento do arquivo.");
-        return;
-    }
-
-    lerHeaderBin_Veiculo(arquivoBin, &header);
-
-    if (header.status == 0) {
-        printf("Falha no processamento do arquivo.");
-        return;
-    }
-
-    if (header.nroRegistros == 0) {
-        printf("Registro inexistente.");
-        return;
-    }
-    
-
-    int headerPos;                      // posição do campo no cabeçalho
-    if (strcmp(campo, "prefixo") == 0)  // prefixo (string)
-        headerPos = 0;
-    else if (strcmp(campo, "data") == 0)  // data (string)
-        headerPos = 1;
-    else if (strcmp(campo, "quantidadeLugares") == 0)  // qt_lugares (int)
-        headerPos = 2;
-    else if (strcmp(campo, "codLinha") == 0)  // cod_linha (int)
-        headerPos = 3;
-    else if (strcmp(campo, "modelo") == 0)  // modelo (string)
-        headerPos = 4;
-    else if (strcmp(campo, "categoria") == 0)  // categoria (string)
-        headerPos = 5;
-
-    int total = header.nroRegistros;  // numero total de registros de dados
-    int existePeloMenosUm = 0;
-
-    fseek(arquivoBin, 175,
-          0);  // posiciono para o primeiro registro de dados do binario
-
-    veiculo veiculoTemp;  // crio a cada iteração um veiculo atribuindo a ele os
-                          // valores lido em cada registro do binario
-
-    while (total--) {  // percorro todos registros de dados
-        lerVeiculo_Bin(arquivoBin, &veiculoTemp);
-        int existe = 0;
-        if (veiculoTemp.removido == '0')  // veiculo ja removido
-            continue;
-
-        switch (headerPos) {
-            case 0:
-                if (strcmp(valor, veiculoTemp.prefixo) == 0) {
-                    imprimeVeiculo(veiculoTemp);
-                    return;  
-                    //como o prefixo é unico pode interromper assim que encontrar o primeiro
-                }
-                break;
-            case 1: 
-                if (strcmp(valor, veiculoTemp.data) == 0) existe = 1;
-                break;
-            case 2:
-                if (veiculoTemp.quantidadeLugares == stringToInt(valor, (int)strlen(valor))) existe = 1;
-                break;
-            case 3:
-                if (veiculoTemp.codLinha == stringToInt(valor, (int)strlen(valor))) existe = 1;
-                break;
-            case 4:
-                if (strcmp(valor, veiculoTemp.modelo) == 0) existe = 1;
-                break;
-            case 5:
-                if (strcmp(valor, veiculoTemp.categoria) == 0) existe = 1;
-                break;
-            default:
-                break;
-        }
-
-        if (existe) { // dado encontrado 
-            imprimeVeiculo(veiculoTemp);
-            existePeloMenosUm = 1;
-        }
-    }
-
-    if (!existePeloMenosUm)printf("Registro inexistente.\n");  // nenhum registro encontrado
-
-    fclose(arquivoBin);
-}
-
-/**
- *  Efetua as leituras correspondentes usando o string_quote
- *  trata os espaços com lixo nas string fixas e salva os dados do novo veículo
- *  no fim do binário
- * @param nomeArquivoBIn nome do arquivo binário onde os valores serão salvos
- */
-void InsertInto_Veiculo(char nomeArquivoBin[100], int numeroDeEntradas) {
-    FILE* arquivoBin = fopen(nomeArquivoBin, "rb+");
-    veiculo novoVeiculo;
-    veiculoHeader header;
-
-    char string[100];
-    int tmp;
-
-    if (arquivoBin == NULL) {
-        printf("Falha no processamento do arquivo.");
-        return;
-    }
-    
-    lerHeaderBin_Veiculo(arquivoBin, &header);
-
-    if (header.status == 0) {
-        printf("Falha no processamento do arquivo.");
-        return;
-    }
-
-    header.status = '0';
-    salvaHeader_Veiculo(arquivoBin, &header);
-
-    while (numeroDeEntradas--){    
-        
-        novoVeiculo.tamanhoRegistro = 0;
-        novoVeiculo.removido = '1';
-
-        lerStringTerminalFixa(novoVeiculo.prefixo,5);
-        lerStringTerminalFixa(novoVeiculo.data,10);
-
-        scanf("%d", &novoVeiculo.quantidadeLugares);
-        scanf("%d", & novoVeiculo.codLinha);
-
-        novoVeiculo.tamanhoModelo = lerStringTerminal(novoVeiculo.modelo);
-        novoVeiculo.tamanhoCategoria = lerStringTerminal(novoVeiculo.categoria);
-
-        novoVeiculo.tamanhoRegistro =  novoVeiculo.tamanhoModelo + novoVeiculo.tamanhoCategoria;
-        novoVeiculo.tamanhoRegistro += 31;  // tamanho da parte fixa da struct
-
-        salvaVeiculo(arquivoBin, &novoVeiculo,&header);  // salvo o novo veículo no fim do binário
-    }
-
-    header.status = '1';
-    salvaHeader_Veiculo(arquivoBin, &header);
-    fclose(arquivoBin);
-    binarioNaTela(nomeArquivoBin);
-}
-
 /**
  * Lê um registro de veiculo do arquivo CSV lidando com campos nulos e os tamanhos
  * de registro total e dos campos variaveis
@@ -334,6 +67,43 @@ int lerVeiculo_Bin(FILE* arquivoBin, veiculo* currV) {
     lerStringBin(arquivoBin, currV->categoria, currV->tamanhoCategoria);
 
     return finalDoArquivo(arquivoBin);
+}
+
+/**
+ * Lê uma  entrada de registro de veiculo do terminal lidando com campos nulos e os tamanhos
+ * de registro total e dos campos variaveis
+ * @param currV variavel para salvar os dados
+ */
+void lerVeiculo_Terminal(veiculo* currV) {
+    currV->tamanhoRegistro = 0;
+    currV->removido = '1';
+
+    lerStringTerminalFixa(currV->prefixo,5);
+    lerStringTerminalFixa(currV->data,10);
+
+    scanf("%d", &currV->quantidadeLugares);
+    scanf("%d", & currV->codLinha);
+
+    currV->tamanhoModelo = lerStringTerminal(currV->modelo);
+    currV->tamanhoCategoria = lerStringTerminal(currV->categoria);
+
+    currV->tamanhoRegistro =  currV->tamanhoModelo + currV->tamanhoCategoria;
+    currV->tamanhoRegistro += 31;  // tamanho da parte fixa da struct
+}
+
+/**
+ * Imprime a data no formato solicitado
+ * @param stringData string original no formato salvo
+ */
+void imprimeData(char* stringData) {
+    printf("Data de entrada do veiculo na frota: ");
+    if (stringData[0] != '\0') {//testa se a data é nula
+        int indiceDoMes =
+            (stringData[5] - '0') * 10 + (stringData[6] - '0') -1;  // calcula o indice do mes e translada para entre 0-11
+        printf("%.2s de %s de %.4s\n", stringData + 8, MESES[indiceDoMes],stringData);
+    } else {
+        printf("campo com valor nulo\n");
+    }
 }
 
 /**
@@ -430,3 +200,220 @@ void salvaHeader_Veiculo(FILE* arquivoBin, veiculoHeader* header) {
     fwrite(&(header->descreveModelo), sizeof(char), 17, arquivoBin);
     fwrite(&(header->descreveCategoria), sizeof(char), 20, arquivoBin);
 }
+
+/**
+ * Cria um arquivo binário na estrutura solicitada de header e campos a partir de um arquivo CSV
+ * @param nomeArquivoCSV nome do arquivo csv fonte dos dados
+ * @param nomeArquivoBIn nome do arquivo binário onde os dados serão salvos
+ */
+void CreateTable_Veiculo(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
+    FILE* arquivoBin = fopen(nomeArquivoBin, "wb");
+    FILE* arquivoCSV = fopen(nomeArquivoCSV, "r");
+
+    if (arquivoCSV == NULL) {
+        printf("Falha no processamento do arquivo.");
+        return;
+    }
+
+    veiculoHeader novoHeader;
+    veiculo novoVeiculo;
+    int finalDoArquivo = 0;
+
+    //definindo valores iniciais do header
+    novoHeader.status = '0';
+    novoHeader.byteProxReg = 175;
+    novoHeader.nroRegistros = 0;
+    novoHeader.nroRegRemovidos = 0;
+
+    lerHeaderCSV_Veiculo(arquivoCSV, &novoHeader);
+    salvaHeader_Veiculo(arquivoBin, &novoHeader);
+
+    //percorre o arquivo até o final
+    while (!finalDoArquivo) {
+        finalDoArquivo = lerVeiculo_CSV(arquivoCSV, &novoVeiculo);
+        salvaVeiculo(arquivoBin, &novoVeiculo, &novoHeader);
+    }
+
+    novoHeader.status = '1';
+
+    salvaHeader_Veiculo(arquivoBin, &novoHeader);//finaliza e salva o header
+
+    //fecha todos arquivos abertos
+    fclose(arquivoBin);
+    fclose(arquivoCSV);
+
+    binarioNaTela(nomeArquivoBin);
+}
+
+/**
+ * Imprime todos os valores de um binário
+ * @param nomeArquivoBIn nome do arquivo binário de onde os dados serão lidos
+ */
+void SelectFrom_Veiculo(char nomeArquivoBin[100]) {
+    FILE* arquivoBin = fopen(nomeArquivoBin, "rb");
+    veiculoHeader novoHeader;
+    veiculo novoVeiculo;
+
+    if (arquivoBin == NULL) {
+        printf("Falha no processamento do arquivo.");
+        return;
+    }
+
+    lerHeaderBin_Veiculo(arquivoBin, &novoHeader);
+
+    if (novoHeader.status == '0') {
+        printf("Falha no processamento do arquivo.");
+        return;
+    }
+
+    if (novoHeader.nroRegistros == 0) {
+        printf("Registro inexistente.");
+        return;
+    }
+
+    int finalDoArquivo = 0;
+    //percorre todo o arquivo imprimindo apenas os registros salvos
+    while (!finalDoArquivo) {
+        finalDoArquivo = lerVeiculo_Bin(arquivoBin, &novoVeiculo);
+        if (novoVeiculo.removido == '1') imprimeVeiculo(novoVeiculo);
+    }
+
+    fclose(arquivoBin);
+}
+
+/**
+ * A busca por um campo em específico é feita pela a
+ * varredura da posição do campo correspondente a ser buscado no cabeçalho, após
+ * isso percorre os registros todos os dados nessa respectiva posição e então
+ * compara com o valor procurado
+ * @param nomeArquivoBIn nome do arquivo binário de onde os dados serão lidos
+ * @param campo nome do campo onde fara a busca
+ * @param valor valor que está sendo buscado
+ */
+void SelectFromWhere_Veiculo(char nomeArquivoBin[100], char* campo, char* valor) {
+    FILE* arquivoBin = fopen(nomeArquivoBin, "rb");
+    veiculoHeader header;
+
+    if (arquivoBin == NULL) {
+        printf("Falha no processamento do arquivo.");
+        return;
+    }
+
+    lerHeaderBin_Veiculo(arquivoBin, &header);
+
+    if (header.status == '0') {
+        printf("Falha no processamento do arquivo.");
+        return;
+    }
+
+    if (header.nroRegistros == 0) {
+        printf("Registro inexistente.");
+        return;
+    }
+    
+
+    int headerPos;                      // posição do campo no cabeçalho
+    if (strcmp(campo, "prefixo") == 0)  // prefixo (string)
+        headerPos = 0;
+    else if (strcmp(campo, "data") == 0)  // data (string)
+        headerPos = 1;
+    else if (strcmp(campo, "quantidadeLugares") == 0)  // qt_lugares (int)
+        headerPos = 2;
+    else if (strcmp(campo, "codLinha") == 0)  // cod_linha (int)
+        headerPos = 3;
+    else if (strcmp(campo, "modelo") == 0)  // modelo (string)
+        headerPos = 4;
+    else if (strcmp(campo, "categoria") == 0)  // categoria (string)
+        headerPos = 5;
+
+    int total = header.nroRegistros;  // numero total de registros de dados
+    int existePeloMenosUm = 0;
+
+    fseek(arquivoBin, 175,0);  // posiciono para o primeiro registro de dados do binario
+
+    veiculo veiculoTemp;  // crio a cada iteração um veiculo atribuindo a ele os
+                          // valores lido em cada registro do binario
+
+    while (total--) {  // percorro todos registros de dados
+        lerVeiculo_Bin(arquivoBin, &veiculoTemp);
+        int existe = 0;
+        if (veiculoTemp.removido == '0') continue;  // veiculo ja removido
+
+        switch (headerPos) {
+            case 0:
+                if (strcmp(valor, veiculoTemp.prefixo) == 0) {
+                    imprimeVeiculo(veiculoTemp);
+                    return;  
+                    //como o prefixo é unico pode interromper assim que encontrar o primeiro
+                }
+                break;
+            case 1: 
+                if (strcmp(valor, veiculoTemp.data) == 0) existe = 1;
+                break;
+            case 2:
+                if (veiculoTemp.quantidadeLugares == stringToInt(valor, (int)strlen(valor))) existe = 1;
+                break;
+            case 3:
+                if (veiculoTemp.codLinha == stringToInt(valor, (int)strlen(valor))) existe = 1;
+                break;
+            case 4:
+                if (strcmp(valor, veiculoTemp.modelo) == 0) existe = 1;
+                break;
+            case 5:
+                if (strcmp(valor, veiculoTemp.categoria) == 0) existe = 1;
+                break;
+            default:
+                break;
+        }
+
+        if (existe) { // dado encontrado 
+            imprimeVeiculo(veiculoTemp);
+            existePeloMenosUm = 1;
+        }
+    }
+
+    if (!existePeloMenosUm)printf("Registro inexistente.\n");  // nenhum registro encontrado
+
+    fclose(arquivoBin);
+}
+
+/**
+ *  Efetua as leituras correspondentes usando o string_quote
+ *  trata os espaços com lixo nas string fixas e salva os dados do novo veículo
+ *  no fim do binário
+ * @param nomeArquivoBIn nome do arquivo binário onde os valores serão salvos
+ */
+void InsertInto_Veiculo(char nomeArquivoBin[100], int numeroDeEntradas) {
+    FILE* arquivoBin = fopen(nomeArquivoBin, "rb+");
+    veiculo novoVeiculo;
+    veiculoHeader header;
+
+    char string[100];
+    int tmp;
+
+    if (arquivoBin == NULL) {
+        printf("Falha no processamento do arquivo.");
+        return;
+    }
+    
+    lerHeaderBin_Veiculo(arquivoBin, &header);
+
+    if (header.status == '0') {
+        printf("Falha no processamento do arquivo.");
+        return;
+    }
+
+    header.status = '0';
+    salvaHeader_Veiculo(arquivoBin, &header);
+
+    while (numeroDeEntradas--){    
+        lerVeiculo_Terminal(&novoVeiculo);
+        salvaVeiculo(arquivoBin, &novoVeiculo,&header);  // salvo o novo veículo no fim do binário
+    }
+
+    header.status = '1';
+    salvaHeader_Veiculo(arquivoBin, &header);
+    fclose(arquivoBin);
+    binarioNaTela(nomeArquivoBin);
+}
+

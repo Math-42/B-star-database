@@ -5,6 +5,7 @@
 #include "../csv/csv.h"
 #include "../utils/utils.h"
 #include <string.h>
+
 /**
  * Imprime o tipo de pagamento no cartão no formato solicitado
  * @param stringData string original no formato salvo
@@ -26,216 +27,6 @@ void imprimirCartao(char* cartao){
             break;
     }
     printf("\n");
-}
-
-/**
- * Cria um arquivo binário na estrutura solicitada de header e campos a partir de um arquivo CSV
- * @param nomeArquivoCSV nome do arquivo csv fonte dos dados
- * @param nomeArquivoBin nome do arquivo binário onde os dados serão salvos
- */
-void CreateTable_Linha(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
-    FILE* arquivoBin = fopen(nomeArquivoBin,"wb");
-    FILE* arquivoCSV = fopen(nomeArquivoCSV,"r");
-
-    if (arquivoCSV == NULL) {
-        printf("Falha no processamento do arquivo.");
-        return;
-    }
-
-    linhaHeader novoHeader;
-    linha novaLinha;
-    int finalDoArquivo = 0;
-
-    //valores iniciais do header
-    novoHeader.status = '0';
-    novoHeader.byteProxReg = 82;
-    novoHeader.nroRegistros = 0;
-    novoHeader.nroRegRemovidos = 0;
-    
-    lerHeaderCSV_Linha(arquivoCSV, &novoHeader);
-    salvaHeader_Linha(arquivoBin, &novoHeader);
-
-    while (!finalDoArquivo) {
-        finalDoArquivo = lerLinha_CSV(arquivoCSV, &novaLinha);
-        salvaLinha(arquivoBin, &novaLinha, &novoHeader);
-    }
-    
-
-    novoHeader.status = '1';
-
-    salvaHeader_Linha(arquivoBin, &novoHeader);
-
-    fclose(arquivoBin);
-    fclose(arquivoCSV);
-
-    binarioNaTela(nomeArquivoBin);
-}
-
-/**
- * Imprime todos os valores de um binário
- * @param nomeArquivoBin nome do arquivo binário de onde os dados serão lidos
- */
-void SelectFrom_Linha(char nomeArquivoBin[100]) {
-    FILE* arquivoBin = fopen(nomeArquivoBin,"rb");
-    linhaHeader novoHeader;
-    linha novaLinha;
-
-    if (arquivoBin == NULL) {
-        printf("Falha no processamento do arquivo.1");
-        return;
-    }
-    
-    lerHeaderBin_Linha(arquivoBin, &novoHeader);
-
-    if (novoHeader.status == 0) {
-        printf("Falha no processamento do arquivo.2");
-        return;
-    }
-
-    if (novoHeader.nroRegistros == 0) {
-        printf("Registro inexistente.");
-        return;
-    }
-
-    int finalDoArquivo = 0;
-
-    while (!finalDoArquivo) {
-        finalDoArquivo = lerLinha_Bin(arquivoBin, &novaLinha);
-        if (novaLinha.removido == '1') imprimeLinha(novaLinha);
-    }
-
-    fclose(arquivoBin);
-}
-
-/**
- * A busca por um campo em específico é feita pela a
- * varredura da posição do campo correspondente a ser buscado no cabeçalho, após
- * isso percorre os registros todos os dados nessa respectiva posição e então
- * compara com o valor procurado
- * @param nomeArquivoBIn nome do arquivo binário de onde os dados serão lidos
- * @param campo nome do campo onde fara a busca
- * @param valor valor que está sendo buscado
- */
-void SelectFromWhere_Linha(char nomeArquivoBin[100], char* campo, char*valor){
-    FILE* arquivoBin = fopen(nomeArquivoBin, "rb");
-    linhaHeader header;
-
-    if (arquivoBin == NULL) {
-        printf("Falha no processamento do arquivo.");
-        return;
-    }
-
-    lerHeaderBin_Linha(arquivoBin, &header);
-
-    if (header.status == 0) {
-        printf("Falha no processamento do arquivo.");
-        return;
-    }
-
-    if (header.nroRegistros == 0) {
-        printf("Registro inexistente.");
-        return;
-    }
-
-    int headerPos;                      // posição do campo no cabeçalho
-    if (strcmp(campo, "codLinha") == 0)  // codLinha (int)
-        headerPos = 0;
-    else if (strcmp(campo, "aceitaCartao") == 0)  // aceitaCartao (string)
-        headerPos = 1;
-    else if (strcmp(campo, "nomeLinha") == 0)  // nomeLinha (string)
-        headerPos = 2;
-    else if (strcmp(campo, "corLinha") == 0)  // corLinha (string)
-        headerPos = 3;
-
-    int total = header.nroRegistros;  // numero total de registros de dados
-    int existePeloMenosUm = 0;
-    
-    fseek(arquivoBin, 82, 0);  // posiciono para o primeiro registro de dados do binario
-
-    linha linhaTemp; // crio a cada iteração uma linha atribuindo a ela os
-                    // valores lido em cada registro do binario
-    
-    while (total--) {  // percorro todos registros de dados
-        lerLinha_Bin(arquivoBin, &linhaTemp);
-        int existe = 0;
-        if (linhaTemp.removido == '0') continue;  // linha ja removida
-
-        switch (headerPos) {
-            case 0:
-                if (linhaTemp.codLinha == stringToInt(valor, (int)strlen(valor))) {
-                    imprimeLinha(linhaTemp);
-                    return;  
-                    //como o codLinha é unico pode interromper assim que encontrar o primeiro
-                }
-                break;
-            case 1: 
-                if (strcmp(valor, linhaTemp.aceitaCartao) == 0) existe = 1;
-                break;
-            case 2:
-                if (strcmp(valor, linhaTemp.nomeLinha) == 0) existe = 1;
-                break;
-            case 3:
-                if (strcmp(valor, linhaTemp.corLinha) == 0) existe = 1;
-                break;
-            default:
-                break;
-        }
-
-        if (existe) {   // dado encontrado 
-            imprimeLinha(linhaTemp);
-            existePeloMenosUm = 1;
-        }
-    }
-
-    if (!existePeloMenosUm)printf("Registro inexistente.\n");  // nenhum registro encontrado
-
-    fclose(arquivoBin);
-}
-
-/**
- *  Efetua as leituras correspondentes usando o string_quote
- *  trata os espaços com lixo nas string fixas e salva os dados do novo veículo
- *  no fim do binário
- * @param nomeArquivoBIn nome do arquivo binário onde os valores serão salvos
- */
-void InsertInto_Linha(char nomeArquivoBin[100], int numeroDeEntradas){
-    FILE* arquivoBin = fopen(nomeArquivoBin, "rb+");
-    linha novaLinha;
-    linhaHeader header;
-
-    char string[100];
-    int tmp;
-
-    if (arquivoBin == NULL) {
-        printf("Falha no processamento do arquivo.");
-        return;
-    }
-    
-    lerHeaderBin_Linha(arquivoBin, &header);
-
-    if (header.status == 0) {
-        printf("Falha no processamento do arquivo.");
-        return;
-    }
-    header.status = '0';
-    salvaHeader_Linha(arquivoBin, &header);
-
-    while (numeroDeEntradas--){  
-        novaLinha.tamanhoRegistro = 0;
-        novaLinha.removido = '1';
-
-        scanf("%d", &novaLinha.codLinha);
-
-        lerStringTerminalFixa(novaLinha.aceitaCartao,1);
-
-        novaLinha.tamanhoNome = lerStringTerminal(novaLinha.nomeLinha);
-        novaLinha.tamanhoCor = lerStringTerminal(novaLinha.corLinha);
-
-        novaLinha.tamanhoRegistro += novaLinha.tamanhoNome + novaLinha.tamanhoCor;
-        novaLinha.tamanhoRegistro += 13;  // tamanho da parte fixa da struct
-
-        salvaLinha(arquivoBin, &novaLinha, &header);  // salvo o novo veículo no fim do binário
-    }
 }
 
 /**
@@ -291,6 +82,27 @@ int lerLinha_Bin(FILE* arquivoBin, linha* currL) {
     lerStringBin(arquivoBin, currL->corLinha, currL->tamanhoCor);
 
     return finalDoArquivo(arquivoBin);
+}
+
+/**
+ * Lê um registro de linha do terminal lidando com campos nulos e os tamanhos
+ * de registro total e dos campos variaveis
+ * @param currL variavel para salvar os dados lidos
+ */
+void lerLinha_Terminal(linha* currL) {
+
+    currL->tamanhoRegistro = 0;
+    currL->removido = '1';
+
+    scanf("%d", &currL->codLinha);
+
+    lerStringTerminalFixa(currL->aceitaCartao,1);
+
+    currL->tamanhoNome = lerStringTerminal(currL->nomeLinha);
+    currL->tamanhoCor = lerStringTerminal(currL->corLinha);
+
+    currL->tamanhoRegistro += currL->tamanhoNome + currL->tamanhoCor;
+    currL->tamanhoRegistro += 13;  // tamanho da parte fixa da struct
 }
 
 /**
@@ -380,4 +192,208 @@ void salvaHeader_Linha(FILE* arquivoBin, linhaHeader* header) {
     fwrite(&(header->descreveCartao), sizeof(char), 13, arquivoBin);
     fwrite(&(header->descreveNome), sizeof(char), 13, arquivoBin);
     fwrite(&(header->descreveLinha), sizeof(char), 24, arquivoBin);
+}
+
+
+/**
+ * Cria um arquivo binário na estrutura solicitada de header e campos a partir de um arquivo CSV
+ * @param nomeArquivoCSV nome do arquivo csv fonte dos dados
+ * @param nomeArquivoBin nome do arquivo binário onde os dados serão salvos
+ */
+void CreateTable_Linha(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
+    FILE* arquivoBin = fopen(nomeArquivoBin,"wb");
+    FILE* arquivoCSV = fopen(nomeArquivoCSV,"r");
+
+    if (arquivoCSV == NULL) {
+        printf("Falha no processamento do arquivo.");
+        return;
+    }
+
+    linhaHeader novoHeader;
+    linha novaLinha;
+    int finalDoArquivo = 0;
+
+    //valores iniciais do header
+    novoHeader.status = '0';
+    novoHeader.byteProxReg = 82;
+    novoHeader.nroRegistros = 0;
+    novoHeader.nroRegRemovidos = 0;
+    
+    lerHeaderCSV_Linha(arquivoCSV, &novoHeader);
+    salvaHeader_Linha(arquivoBin, &novoHeader);
+
+    while (!finalDoArquivo) {
+        finalDoArquivo = lerLinha_CSV(arquivoCSV, &novaLinha);
+        salvaLinha(arquivoBin, &novaLinha, &novoHeader);
+    }
+    
+
+    novoHeader.status = '1';
+
+    salvaHeader_Linha(arquivoBin, &novoHeader);
+
+    fclose(arquivoBin);
+    fclose(arquivoCSV);
+
+    binarioNaTela(nomeArquivoBin);
+}
+
+/**
+ * Imprime todos os valores de um binário
+ * @param nomeArquivoBin nome do arquivo binário de onde os dados serão lidos
+ */
+void SelectFrom_Linha(char nomeArquivoBin[100]) {
+    FILE* arquivoBin = fopen(nomeArquivoBin,"rb");
+    linhaHeader novoHeader;
+    linha novaLinha;
+
+    if (arquivoBin == NULL) {
+        printf("Falha no processamento do arquivo.1");
+        return;
+    }
+    
+    lerHeaderBin_Linha(arquivoBin, &novoHeader);
+
+    if (novoHeader.status == '0') {
+        printf("Falha no processamento do arquivo.2");
+        return;
+    }
+
+    if (novoHeader.nroRegistros == 0) {
+        printf("Registro inexistente.");
+        return;
+    }
+
+    int finalDoArquivo = 0;
+
+    while (!finalDoArquivo) {
+        finalDoArquivo = lerLinha_Bin(arquivoBin, &novaLinha);
+        if (novaLinha.removido == '1') imprimeLinha(novaLinha);
+    }
+
+    fclose(arquivoBin);
+}
+
+/**
+ * A busca por um campo em específico é feita pela a
+ * varredura da posição do campo correspondente a ser buscado no cabeçalho, após
+ * isso percorre os registros todos os dados nessa respectiva posição e então
+ * compara com o valor procurado
+ * @param nomeArquivoBIn nome do arquivo binário de onde os dados serão lidos
+ * @param campo nome do campo onde fara a busca
+ * @param valor valor que está sendo buscado
+ */
+void SelectFromWhere_Linha(char nomeArquivoBin[100], char* campo, char*valor){
+    FILE* arquivoBin = fopen(nomeArquivoBin, "rb");
+    linhaHeader header;
+
+    if (arquivoBin == NULL) {
+        printf("Falha no processamento do arquivo.");
+        return;
+    }
+
+    lerHeaderBin_Linha(arquivoBin, &header);
+
+    if (header.status == '0') {
+        printf("Falha no processamento do arquivo.");
+        return;
+    }
+
+    if (header.nroRegistros == 0) {
+        printf("Registro inexistente.");
+        return;
+    }
+
+    int headerPos;                      // posição do campo no cabeçalho
+    if (strcmp(campo, "codLinha") == 0)  // codLinha (int)
+        headerPos = 0;
+    else if (strcmp(campo, "aceitaCartao") == 0)  // aceitaCartao (string)
+        headerPos = 1;
+    else if (strcmp(campo, "nomeLinha") == 0)  // nomeLinha (string)
+        headerPos = 2;
+    else if (strcmp(campo, "corLinha") == 0)  // corLinha (string)
+        headerPos = 3;
+
+    int total = header.nroRegistros;  // numero total de registros de dados
+    int existePeloMenosUm = 0;
+    
+    fseek(arquivoBin, 82, 0);  // posiciono para o primeiro registro de dados do binario
+
+    linha linhaTemp; // crio a cada iteração uma linha atribuindo a ela os
+                    // valores lido em cada registro do binario
+    
+    while (total--) {  // percorro todos registros de dados
+        lerLinha_Bin(arquivoBin, &linhaTemp);
+        int existe = 0;
+        if (linhaTemp.removido == '0') continue;  // linha ja removida
+        
+        switch (headerPos) {
+            case 0:
+                if (linhaTemp.codLinha == stringToInt(valor, (int)strlen(valor))) {
+                    imprimeLinha(linhaTemp);
+                    return;  
+                    //como o codLinha é unico pode interromper assim que encontrar o primeiro
+                }
+                break;
+            case 1: 
+                if (strcmp(valor, linhaTemp.aceitaCartao) == 0) existe = 1;
+                break;
+            case 2:
+                if (strcmp(valor, linhaTemp.nomeLinha) == 0) existe = 1;
+                break;
+            case 3:
+                if (strcmp(valor, linhaTemp.corLinha) == 0) existe = 1;
+                break;
+            default:
+                break;
+        }
+
+        if (existe) {   // dado encontrado 
+            imprimeLinha(linhaTemp);
+            existePeloMenosUm = 1;
+        }
+    }
+
+    if (!existePeloMenosUm)printf("Registro inexistente.\n");  // nenhum registro encontrado
+
+    fclose(arquivoBin);
+}
+
+/**
+ *  Efetua as leituras correspondentes usando o string_quote
+ *  trata os espaços com lixo nas string fixas e salva os dados do novo veículo
+ *  no fim do binário
+ * @param nomeArquivoBIn nome do arquivo binário onde os valores serão salvos
+ */
+void InsertInto_Linha(char nomeArquivoBin[100], int numeroDeEntradas){
+    FILE* arquivoBin = fopen(nomeArquivoBin, "rb+");
+    linha novaLinha;
+    linhaHeader header;
+
+    char string[100];
+    int tmp;
+
+    if (arquivoBin == NULL) {
+        printf("Falha no processamento do arquivo.");
+        return;
+    }
+    
+    lerHeaderBin_Linha(arquivoBin, &header);
+
+    if (header.status == '0') {
+        printf("Falha no processamento do arquivo.");
+        return;
+    }
+    header.status = '0';
+    salvaHeader_Linha(arquivoBin, &header);
+
+    while (numeroDeEntradas--){  
+        lerLinha_Terminal(&novaLinha);
+        salvaLinha(arquivoBin, &novaLinha, &header);  // salvo o novo veículo no fim do binário
+    }
+
+    header.status = '1';
+    salvaHeader_Linha(arquivoBin, &header);
+    fclose(arquivoBin);
+    binarioNaTela(nomeArquivoBin);
 }
