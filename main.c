@@ -49,18 +49,13 @@ void menu() {
 	case 7:
 		scanf("%s", arquivoBin);
 		scanf("%d", &n);
-		while(n--){
-			InsertInto_Veiculo(arquivoBin);
-		}
-		binarioNaTela(arquivoBin);
+		InsertInto_Veiculo(arquivoBin, n);
 		return;
 		break;
 	case 8:
 		scanf("%s", arquivoBin);
 		scanf("%d", &n);
-		while(n--){
-			InsertInto_Linha(arquivoBin);
-		}
+		InsertInto_Linha(arquivoBin, n);
 		return;
 		break;
 	default:
