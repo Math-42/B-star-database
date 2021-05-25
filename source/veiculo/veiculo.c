@@ -13,6 +13,21 @@ char MESES[][12] = {"janeiro",  "fevereiro", "março",    "abril",
                     "setembro", "outubro",   "novembro", "dezembro"}; // todos os meses
 
 
+void imprimeVeiculo2(veiculo currVeiculo) {
+    printf("Imprimindo veiculo: \n");
+    printf("removido: %c \n", currVeiculo.removido);
+    printf("tamanhoRegistro: %d\n", currVeiculo.tamanhoRegistro);
+    printf("prefixo: %s\n", currVeiculo.prefixo);
+    printf("data: %s\n", currVeiculo.data);
+    printf("quantidadeLugares: %d\n", currVeiculo.quantidadeLugares);
+    printf("codLinha: %d\n", currVeiculo.codLinha);
+    printf("tamanhoModelo: %d\n", currVeiculo.tamanhoModelo);
+    printf("modelo: %s\n", currVeiculo.modelo);
+    printf("tamanhoCategoria: %d\n", currVeiculo.tamanhoCategoria);
+    printf("categoria: %s\n", currVeiculo.categoria);
+    printf("====================\n");
+}
+
 /**
  * Imprime a data no formato solicitado
  * @param stringData string original no formato salvo
@@ -124,7 +139,6 @@ void SelectFrom_Veiculo(char nomeArquivoBin[100]) {
 void SelectFromWhere_Veiculo(char nomeArquivoBin[100], char* campo, char* valor) {
     FILE* arquivoBin = fopen(nomeArquivoBin, "rb");
     veiculoHeader header;
-    veiculo novoVeiculo;
 
     if (arquivoBin == NULL) {
         printf("Falha no processamento do arquivo.");
@@ -142,8 +156,7 @@ void SelectFromWhere_Veiculo(char nomeArquivoBin[100], char* campo, char* valor)
         printf("Registro inexistente.");
         return;
     }
-
-    long int currPos = ftell(arquivoBin);
+    
 
     int headerPos;                      // posição do campo no cabeçalho
     if (strcmp(campo, "prefixo") == 0)  // prefixo (string)
@@ -177,7 +190,6 @@ void SelectFromWhere_Veiculo(char nomeArquivoBin[100], char* campo, char* valor)
         switch (headerPos) {
             case 0:
                 if (strcmp(valor, veiculoTemp.prefixo) == 0) {
-                    fseek(arquivoBin, currPos, 0);
                     imprimeVeiculo(veiculoTemp);
                     return;  
                     //como o prefixo é unico pode interromper assim que encontrar o primeiro
@@ -202,7 +214,7 @@ void SelectFromWhere_Veiculo(char nomeArquivoBin[100], char* campo, char* valor)
                 break;
         }
 
-        if (existe) {
+        if (existe) { // dado encontrado 
             imprimeVeiculo(veiculoTemp);
             existePeloMenosUm = 1;
         }
@@ -210,7 +222,6 @@ void SelectFromWhere_Veiculo(char nomeArquivoBin[100], char* campo, char* valor)
 
     if (!existePeloMenosUm)printf("Registro inexistente.\n");  // nenhum registro encontrado
 
-    fseek(arquivoBin, currPos, 0);
     fclose(arquivoBin);
 }
 
@@ -219,10 +230,9 @@ void SelectFromWhere_Veiculo(char nomeArquivoBin[100], char* campo, char* valor)
  *  trata os espaços com lixo nas string fixas e salva os dados do novo veículo
  *  no fim do binário
  * @param nomeArquivoBIn nome do arquivo binário onde os valores serão salvos
- * @param quantidadeInputs quantidade de valores que serão salvos
  */
-void InsertInto_Veiculo(char nomeArquivoBin[100], int quantidadeInputs) {
-    FILE* arquivoBin = fopen(nomeArquivoBin, "wb");
+void InsertInto_Veiculo(char nomeArquivoBin[100]) {
+    FILE* arquivoBin = fopen(nomeArquivoBin, "rb+");
     veiculo novoVeiculo;
     veiculoHeader header;
 
@@ -237,14 +247,17 @@ void InsertInto_Veiculo(char nomeArquivoBin[100], int quantidadeInputs) {
     lerHeaderBin_Veiculo(arquivoBin, &header);
 
     if (header.status == 0) {
-        printf("Falha no processamento do arquivo.");
+        printf("Falha no processamento do arquivo.1");
         return;
     }
 
     if (header.nroRegistros == 0) {
-        printf("Registro inexistente.");
+        printf("Registro inexistente.0");
         return;
     }
+
+    header.status = '0';
+    salvaHeader_Veiculo(arquivoBin, &header);
 
     novoVeiculo.tamanhoRegistro = 0;
     novoVeiculo.removido = '1';
@@ -257,7 +270,8 @@ void InsertInto_Veiculo(char nomeArquivoBin[100], int quantidadeInputs) {
     strcpy(novoVeiculo.prefixo,
            string);  // copio a string obtida em seu campo respectivo do veiculo
 
-    for (int i = 0; i < 11; i++) string[i] = '@';
+    for (int i = 0; i < 11; i++)
+        string[i] = '@';
     scan_quote_string(string);
     string[(int)strlen(string)] = '\0';
     novoVeiculo.tamanhoRegistro += (int)strlen(string);
@@ -283,7 +297,11 @@ void InsertInto_Veiculo(char nomeArquivoBin[100], int quantidadeInputs) {
     novoVeiculo.tamanhoRegistro += 4 + (int)strlen(string);
     strcpy(novoVeiculo.categoria, string);
 
+    imprimeVeiculo2(novoVeiculo);
     salvaVeiculo(arquivoBin, &novoVeiculo,&header);  // salvo o novo veículo no fim do binário
+
+    header.status = '1';
+    salvaHeader_Veiculo(arquivoBin, &header);
 }
 
 /**

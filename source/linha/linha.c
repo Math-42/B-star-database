@@ -4,7 +4,7 @@
 #include "../binario/binario.h"
 #include "../csv/csv.h"
 #include "../utils/utils.h"
-
+#include <string.h>
 /**
  * Imprime o tipo de pagamento no cartão no formato solicitado
  * @param stringData string original no formato salvo
@@ -109,6 +109,156 @@ void SelectFrom_Linha(char nomeArquivoBin[100]) {
     salvaHeader_Linha(arquivoBin, &novoHeader);
 
     fclose(arquivoBin);
+}
+
+/**
+ * A busca por um campo em específico é feita pela a
+ * varredura da posição do campo correspondente a ser buscado no cabeçalho, após
+ * isso percorre os registros todos os dados nessa respectiva posição e então
+ * compara com o valor procurado
+ * @param nomeArquivoBIn nome do arquivo binário de onde os dados serão lidos
+ * @param campo nome do campo onde fara a busca
+ * @param valor valor que está sendo buscado
+ */
+void SelectFromWhere_Linha(char nomeArquivoBin[100], char* campo, char*valor){
+    FILE* arquivoBin = fopen(nomeArquivoBin, "rb");
+    linhaHeader header;
+
+    if (arquivoBin == NULL) {
+        printf("Falha no processamento do arquivo.");
+        return;
+    }
+
+    lerHeaderBin_Linha(arquivoBin, &header);
+
+    if (header.status == 0) {
+        printf("Falha no processamento do arquivo.");
+        return;
+    }
+
+    if (header.nroRegistros == 0) {
+        printf("Registro inexistente.");
+        return;
+    }
+
+    long int currPos = ftell(arquivoBin);
+
+    int headerPos;                      // posição do campo no cabeçalho
+    if (strcmp(campo, "codLinha") == 0)  // codLinha (int)
+        headerPos = 0;
+    else if (strcmp(campo, "aceitaCartao") == 0)  // aceitaCartao (string)
+        headerPos = 1;
+    else if (strcmp(campo, "nomeLinha") == 0)  // nomeLinha (string)
+        headerPos = 2;
+    else if (strcmp(campo, "corLinha") == 0)  // corLinha (string)
+        headerPos = 3;
+
+    int total = header.nroRegistros;  // numero total de registros de dados
+    int existePeloMenosUm = 0;
+
+    fseek(arquivoBin, 83, 0);  // posiciono para o primeiro registro de dados do binario
+
+    linha linhaTemp; // crio a cada iteração uma linha atribuindo a ela os
+                    // valores lido em cada registro do binario
+
+    while (total--) {  // percorro todos registros de dados
+        lerLinha_Bin(arquivoBin, &linhaTemp);
+        int existe = 0;
+        if (linhaTemp.removido == '0')  // veiculo ja removido
+            continue;
+
+        switch (headerPos) {
+            case 0:
+                if (linhaTemp.codLinha == stringToInt(valor, (int)strlen(valor))) {
+                    fseek(arquivoBin, currPos, 0);
+                    imprimeLinha(linhaTemp);
+                    return;  
+                    //como o codLinha é unico pode interromper assim que encontrar o primeiro
+                }
+                break;
+            case 1: 
+                if (strcmp(valor, linhaTemp.aceitaCartao) == 0) existe = 1;
+                break;
+            case 2:
+                if (strcmp(valor, linhaTemp.nomeLinha) == 0) existe = 1;
+                break;
+            case 3:
+                if (strcmp(valor, linhaTemp.corLinha) == 0) existe = 1;
+                break;
+            default:
+                break;
+        }
+
+        if (existe) {   // dado encontrado 
+            imprimeLinha(linhaTemp);
+            existePeloMenosUm = 1;
+        }
+    }
+
+    if (!existePeloMenosUm)printf("Registro inexistente.\n");  // nenhum registro encontrado
+
+    fseek(arquivoBin, currPos, 0);
+    fclose(arquivoBin);
+}
+
+/**
+ *  Efetua as leituras correspondentes usando o string_quote
+ *  trata os espaços com lixo nas string fixas e salva os dados do novo veículo
+ *  no fim do binário
+ * @param nomeArquivoBIn nome do arquivo binário onde os valores serão salvos
+ */
+void InsertInto_Linha(char nomeArquivoBin[100]){
+    FILE* arquivoBin = fopen(nomeArquivoBin, "wb");
+    linha novaLinha;
+    linhaHeader header;
+
+    char string[100];
+    int tmp;
+
+    if (arquivoBin == NULL) {
+        printf("Falha no processamento do arquivo.");
+        return;
+    }
+    
+    lerHeaderBin_Linha(arquivoBin, &header);
+
+    if (header.status == 0) {
+        printf("Falha no processamento do arquivo.");
+        return;
+    }
+
+    if (header.nroRegistros == 0) {
+        printf("Registro inexistente.");
+        return;
+    }
+
+    novaLinha.tamanhoRegistro = 0;
+    novaLinha.removido = '1';
+
+    scanf("%d", &tmp);
+    novaLinha.codLinha = tmp;
+    novaLinha.tamanhoRegistro += 4;
+
+    for (int i = 0; i < 5; i++)  // trata o lixo na string de tam fixo
+        string[i] = '@';
+    scan_quote_string(string);
+    string[(int)strlen(string)] = '\0';
+    novaLinha.tamanhoRegistro += (int)strlen(string);
+    strcpy(novaLinha.aceitaCartao, string);  // copio a string obtida em seu campo respectivo da linha
+
+    scan_quote_string(string);
+    string[(int)strlen(string)] = '\0';
+    novaLinha.tamanhoNome += (int)strlen(string);
+    novaLinha.tamanhoRegistro += 4 + (int)strlen(string);
+    strcpy(novaLinha.nomeLinha, string);
+
+    scan_quote_string(string);
+    string[(int)strlen(string)] = '\0';
+    novaLinha.tamanhoCor += (int)strlen(string);
+    novaLinha.tamanhoRegistro += 4 + (int)strlen(string);
+    strcpy(novaLinha.corLinha, string);
+
+    salvaLinha(arquivoBin, &novaLinha, &header);  // salvo o novo veículo no fim do binário
 }
 
 /**

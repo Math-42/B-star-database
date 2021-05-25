@@ -5,7 +5,7 @@
 #include "source/utils/utils.h"
 
 void menu() {
-	int funcionalidade;
+	int funcionalidade, n;
 	char arquivoCSV[100];
 	char arquivoBin[100];
 	char nomeDoCampo[100];
@@ -40,15 +40,27 @@ void menu() {
 		return;
 		break;
 	case 6:
-		
+		scanf("%s", arquivoBin);
+		scanf("%s", nomeDoCampo);
+		scan_quote_string(valor);
+		SelectFromWhere_Linha(arquivoBin,nomeDoCampo,valor);
 		return;
 		break;
 	case 7:
-		
+		scanf("%s", arquivoBin);
+		scanf("%d", &n);
+		while(n--){
+			InsertInto_Veiculo(arquivoBin);
+		}
+		binarioNaTela(arquivoBin);
 		return;
 		break;
 	case 8:
-		
+		scanf("%s", arquivoBin);
+		scanf("%d", &n);
+		while(n--){
+			InsertInto_Linha(arquivoBin);
+		}
 		return;
 		break;
 	default:
@@ -57,6 +69,6 @@ void menu() {
 }
 
 int main() {
-	menu(4);
+	menu();
 	return 0;
 }
