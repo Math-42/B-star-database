@@ -49,7 +49,7 @@ int lerString(FILE* arquivo, char* string) {
  * Lê um campo de string do csv de tamanho fixo
  * @param arquivo arquivo a ser lido
  * @param string local onde o conteudo será salvo
- * @param string tamanho máximo aceito
+ * @param tamanhoMaximo tamanho máximo aceito
  * @return retorna o tamanho real da string lida
  */
 int lerStringFixa(FILE* arquivo, char* string,int tamanhoMaximo) {
