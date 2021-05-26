@@ -7,11 +7,37 @@
 #include <string.h>
 
 /**
+ *  Valida o header de um arquivo
+ * @param header header a ser verificado
+ * @param verificaConsistencia flag que indica para testar a consistencia do arquivo
+ * @param verificaRegistros flag que indica para verificar se existem registros
+ * @return retorna 1 caso o arquivo passe nos testes exigidos
+ */
+int validaHeader_linha(FILE** arquivo, linhaHeader header, int verificaConsistencia, int verificaRegistros){
+    
+    int correto = 1;
+
+    if (verificaConsistencia>0 && header.status == '0') {
+        printf("Falha no processamento do arquivo.");
+        correto = 0;
+    }
+
+    if (verificaRegistros>0 && header.nroRegistros == 0) {
+        printf("Registro inexistente.");
+        correto = 0;;
+    }
+    if(!correto)fclose(*arquivo);
+    return correto;
+}
+
+
+/**
  * Imprime o tipo de pagamento no cartão no formato solicitado
+ * @param descricao descricao do campo
  * @param stringData string original no formato salvo
  */
-void imprimirCartao(char* cartao){
-    printf("Aceita cartao: ");
+void imprimirCartao(char* descricao, char* cartao){
+    printf("%s: ", descricao);
     switch (cartao[0]){
         case 'S':
             printf("PAGAMENTO SOMENTE COM CARTAO SEM PRESENCA DE COBRADOR");
@@ -108,13 +134,14 @@ void lerLinha_Terminal(linha* currL) {
 /**
  * Imprime os campos de uma linha conforme a formatação requisitada
  * @param currLinha linha a ser impressa
+ * @param header header do arquivo
  */
-void imprimeLinha(linha currLinha) {
+void imprimeLinha(linha currLinha, linhaHeader header) {
 
-    imprimirCampo("Codigo da linha",&currLinha.codLinha,1);
-    imprimirCampo("Nome da linha",currLinha.nomeLinha,0);
-    imprimirCampo("Cor que descreve a linha",currLinha.corLinha,0);
-    imprimirCartao(currLinha.aceitaCartao);//o cartão recebe um tratamento diferente devido as excessões
+    imprimirCampo(header.descreveCodigo,&currLinha.codLinha,1);
+    imprimirCampo(header.descreveNome,currLinha.nomeLinha,0);
+    imprimirCampo(header.descreveLinha,currLinha.corLinha,0);
+    imprimirCartao(header.descreveCartao, currLinha.aceitaCartao);//o cartão recebe um tratamento diferente devido as excessões
 
     printf("\n");
 
@@ -170,10 +197,11 @@ void lerHeaderBin_Linha(FILE* arquivoBin, linhaHeader* header) {
     fread(&(header->byteProxReg), sizeof(long int), 1, arquivoBin);
     fread(&(header->nroRegistros), sizeof(int), 1, arquivoBin);
     fread(&(header->nroRegRemovidos), sizeof(int), 1, arquivoBin);
-    fread(&(header->descreveCodigo), sizeof(char), 15, arquivoBin);
-    fread(&(header->descreveCartao), sizeof(char), 13, arquivoBin);
-    fread(&(header->descreveNome), sizeof(char), 13, arquivoBin);
-    fread(&(header->descreveLinha), sizeof(char), 24, arquivoBin);
+    lerStringBin(arquivoBin,(header->descreveCodigo), 15);
+    lerStringBin(arquivoBin,(header->descreveCartao), 13);
+    lerStringBin(arquivoBin,(header->descreveNome), 13);
+    lerStringBin(arquivoBin,(header->descreveLinha), 24);
+
 }
 
 /**
@@ -201,13 +229,12 @@ void salvaHeader_Linha(FILE* arquivoBin, linhaHeader* header) {
  * @param nomeArquivoBin nome do arquivo binário onde os dados serão salvos
  */
 void CreateTable_Linha(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
-    FILE* arquivoBin = fopen(nomeArquivoBin,"wb");
-    FILE* arquivoCSV = fopen(nomeArquivoCSV,"r");
+    FILE* arquivoBin;
+    FILE* arquivoCSV;
 
-    if (arquivoCSV == NULL) {
-        printf("Falha no processamento do arquivo.");
-        return;
-    }
+    if(!abrirArquivo(&arquivoCSV,nomeArquivoCSV,"r",1))return;
+    
+    abrirArquivo(&arquivoBin,nomeArquivoBin,"wb",0);
 
     linhaHeader novoHeader;
     linha novaLinha;
@@ -243,32 +270,21 @@ void CreateTable_Linha(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
  * @param nomeArquivoBin nome do arquivo binário de onde os dados serão lidos
  */
 void SelectFrom_Linha(char nomeArquivoBin[100]) {
-    FILE* arquivoBin = fopen(nomeArquivoBin,"rb");
+
+    FILE* arquivoBin;
+    if(!abrirArquivo(&arquivoBin,nomeArquivoBin,"rb",1))return;
+
     linhaHeader novoHeader;
     linha novaLinha;
-
-    if (arquivoBin == NULL) {
-        printf("Falha no processamento do arquivo.1");
-        return;
-    }
     
     lerHeaderBin_Linha(arquivoBin, &novoHeader);
-
-    if (novoHeader.status == '0') {
-        printf("Falha no processamento do arquivo.2");
-        return;
-    }
-
-    if (novoHeader.nroRegistros == 0) {
-        printf("Registro inexistente.");
-        return;
-    }
+    if(!validaHeader_linha(&arquivoBin,novoHeader,1,1))return;
 
     int finalDoArquivo = 0;
 
     while (!finalDoArquivo) {
         finalDoArquivo = lerLinha_Bin(arquivoBin, &novaLinha);
-        if (novaLinha.removido == '1') imprimeLinha(novaLinha);
+        if (novaLinha.removido == '1') imprimeLinha(novaLinha, novoHeader);
     }
 
     fclose(arquivoBin);
@@ -284,25 +300,13 @@ void SelectFrom_Linha(char nomeArquivoBin[100]) {
  * @param valor valor que está sendo buscado
  */
 void SelectFromWhere_Linha(char nomeArquivoBin[100], char* campo, char*valor){
-    FILE* arquivoBin = fopen(nomeArquivoBin, "rb");
+    FILE* arquivoBin;
+    if(!abrirArquivo(&arquivoBin,nomeArquivoBin,"rb",1))return;
+
     linhaHeader header;
 
-    if (arquivoBin == NULL) {
-        printf("Falha no processamento do arquivo.");
-        return;
-    }
-
     lerHeaderBin_Linha(arquivoBin, &header);
-
-    if (header.status == '0') {
-        printf("Falha no processamento do arquivo.");
-        return;
-    }
-
-    if (header.nroRegistros == 0) {
-        printf("Registro inexistente.");
-        return;
-    }
+    if(!validaHeader_linha(&arquivoBin,header,1,1))return;    
 
     int headerPos;                      // posição do campo no cabeçalho
     if (strcmp(campo, "codLinha") == 0)  // codLinha (int)
@@ -330,7 +334,8 @@ void SelectFromWhere_Linha(char nomeArquivoBin[100], char* campo, char*valor){
         switch (headerPos) {
             case 0:
                 if (linhaTemp.codLinha == stringToInt(valor, (int)strlen(valor))) {
-                    imprimeLinha(linhaTemp);
+                    imprimeLinha(linhaTemp, header);
+                    fclose(arquivoBin);
                     return;  
                     //como o codLinha é unico pode interromper assim que encontrar o primeiro
                 }
@@ -349,7 +354,7 @@ void SelectFromWhere_Linha(char nomeArquivoBin[100], char* campo, char*valor){
         }
 
         if (existe) {   // dado encontrado 
-            imprimeLinha(linhaTemp);
+            imprimeLinha(linhaTemp, header);
             existePeloMenosUm = 1;
         }
     }
@@ -366,12 +371,10 @@ void SelectFromWhere_Linha(char nomeArquivoBin[100], char* campo, char*valor){
  * @param nomeArquivoBIn nome do arquivo binário onde os valores serão salvos
  */
 void InsertInto_Linha(char nomeArquivoBin[100], int numeroDeEntradas){
-    FILE* arquivoBin = fopen(nomeArquivoBin, "rb+");
+    FILE* arquivoBin;
+    if(!abrirArquivo(&arquivoBin,nomeArquivoBin,"rb+",1))return;
     linha novaLinha;
     linhaHeader header;
-
-    char string[100];
-    int tmp;
 
     if (arquivoBin == NULL) {
         printf("Falha no processamento do arquivo.");
@@ -379,11 +382,8 @@ void InsertInto_Linha(char nomeArquivoBin[100], int numeroDeEntradas){
     }
     
     lerHeaderBin_Linha(arquivoBin, &header);
+    if(!validaHeader_linha(&arquivoBin,header,1,0))return;
 
-    if (header.status == '0') {
-        printf("Falha no processamento do arquivo.");
-        return;
-    }
     header.status = '0';
     salvaHeader_Linha(arquivoBin, &header);
 
