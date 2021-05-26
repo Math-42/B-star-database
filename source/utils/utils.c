@@ -6,6 +6,24 @@
 #include <ctype.h>
 
 /**
+ * Abre um arquivo e testa se ele já existe ou não
+ * @param arquivo ponteiro do tipo FILE*
+ * @param nomeDoArquivo nome do arquivo que será aberto
+ * @param tipoDeAbertura a forma que ele deve ser aberto, rb, wb+ e etc
+ * @param verificaExistencia flag que indica se deve ou não testar a existencia, 0 para falso, 1 ou mais para verdade
+ * @return retorna 1 caso o arquivo exista (ou caso não for exigida a verificação) e 0 caso não exista
+ */
+int abrirArquivo(FILE** arquivo,char* nomeDoArquivo, char* tipoDeAbertura, int verificaExistencia){
+    int existe = 1;
+    *arquivo = fopen(nomeDoArquivo, tipoDeAbertura);
+    if(verificaExistencia>0 && *arquivo==NULL){
+        existe = 0;
+        printf("Falha no processamento do arquivo.");
+    }
+    return existe;
+}
+
+/**
  * Transforma um inteiro no formato string em um inteiro
  * @param string string inicial
  * @param tamanho quantidade de digitos do número

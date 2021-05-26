@@ -2,6 +2,7 @@
 #define _UTILS_H_
 #include <stdio.h>
 
+int abrirArquivo(FILE** arquivo,char* nomeDoArquivo, char* tipoDeAbertura, int verificaExistencia);
 int finalDoArquivo(FILE* arquivo);
 void imprimirCampo(char* descricao, void* valor, int isInt);
 void binarioNaTela(char *nomeArquivoBinario);
