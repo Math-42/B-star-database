@@ -1,3 +1,11 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Trabalho 1 da disciplina de organização de arquivos                             *
+ * Autores: Israel Felipe da Silva   - 11796531 								   *
+ * 			Matheus Vieira Gonçalves - 11200397                                    *
+ *                     															   *
+ * Maio/2021                                                                       *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "source/veiculo/veiculo.h"
@@ -55,7 +63,7 @@ void menu() {
 	case 8:
 		scanf("%s", arquivoBin);
 		scanf("%d", &n);
-		InsertInto_Linha(arquivoBin, n);
+		InsertInto_Linha(arquivoBin, 4);
 		return;
 		break;
 	default:
