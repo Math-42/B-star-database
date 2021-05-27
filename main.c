@@ -1,11 +1,12 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * * * Trabalho 1 da disciplina de organização de arquivos * Autores: Israel
- * Felipe da Silva   - 11796531
- * * Matheus Vieira Gonçalves - 11200397                                    *
- *                     															   *
- * Maio/2021 *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * * */
+ * * * Trabalho 1 da disciplina de organização de arquivos                     *
+ * Autores:                                                                    *
+ * Israel Felipe da Silva   - 11796531                                         *
+ * Matheus Vieira Gonçalves - 11200397                                         *
+ *                     														   *
+ * Maio/2021                                                                   *    
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 
 #include <stdio.h>
 #include <stdlib.h>

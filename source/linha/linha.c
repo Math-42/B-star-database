@@ -8,6 +8,7 @@
 
 /**
  *  Valida o header de um arquivo
+ * @param arquivo arquivo de onde o header se origina
  * @param header header a ser verificado
  * @param verificaConsistencia flag que indica para testar a consistencia do arquivo
  * @param verificaRegistros flag que indica para verificar se existem registros
@@ -34,7 +35,7 @@ int validaHeader_linha(FILE** arquivo, linhaHeader header, int verificaConsisten
 /**
  * Imprime o tipo de pagamento no cartão no formato solicitado
  * @param descricao descricao do campo
- * @param stringData string original no formato salvo
+ * @param cartao string original no formato salvo
  */
 void imprimirCartao(char* descricao, char* cartao){
     printf("%s: ", descricao);
@@ -221,7 +222,6 @@ void salvaHeader_Linha(FILE* arquivoBin, linhaHeader* header) {
     fwrite(&(header->descreveNome), sizeof(char), 13, arquivoBin);
     fwrite(&(header->descreveLinha), sizeof(char), 24, arquivoBin);
 }
-
 
 /**
  * Cria um arquivo binário na estrutura solicitada de header e campos a partir de um arquivo CSV

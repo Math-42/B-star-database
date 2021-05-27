@@ -15,6 +15,7 @@ char MESES[][12] = {"janeiro",  "fevereiro", "março",    "abril",
 
 /**
  *  Valida o header de um arquivo
+ * @param arquivo arquivo de onde o header se origina
  * @param header header a ser verificado
  * @param verificaConsistencia flag que indica para testar a consistencia do arquivo
  * @param verificaRegistros flag que indica para verificar se existem registros
@@ -133,7 +134,7 @@ void imprimeData(char* descricao,char* stringData) {
 
 /**
  * Imprime os campos de um veiculo conforme a formatação requisitada
- * @param currV veiculo a ser impresso
+ * @param currVeiculo veiculo a ser impresso
  * @param header header do arquivo
  */
 void imprimeVeiculo(veiculo currVeiculo, veiculoHeader header) {
