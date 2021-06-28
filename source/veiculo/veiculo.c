@@ -244,7 +244,7 @@ void CreateTable_Veiculo(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
     
     veiculoHeader novoHeader;
     veiculo novoVeiculo;
-    int finalDoArquivo = 0;
+    
 
     //definindo valores iniciais do header
     novoHeader.status = '0';
@@ -255,9 +255,10 @@ void CreateTable_Veiculo(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
     lerHeaderCSV_Veiculo(arquivoCSV, &novoHeader);
     salvaHeader_Veiculo(arquivoBin, &novoHeader);
     
+    int isFinalDoArquivo = finalDoArquivo(arquivoCSV);
     //percorre o arquivo até o final
-    while (!finalDoArquivo) {
-        finalDoArquivo = lerVeiculo_CSV(arquivoCSV, &novoVeiculo);
+    while (!isFinalDoArquivo) {
+        isFinalDoArquivo = lerVeiculo_CSV(arquivoCSV, &novoVeiculo);
         salvaVeiculo(arquivoBin, &novoVeiculo, &novoHeader);
     }
 
@@ -395,8 +396,12 @@ void InsertInto_Veiculo(char nomeArquivoBin[100], int numeroDeEntradas) {
     header.status = '0';
     salvaHeader_Veiculo(arquivoBin, &header);
 
+    printf("Numero de entradas: %d \n", numeroDeEntradas);
     while (numeroDeEntradas--){    
+        printf("Numero de entradas: %d \n", numeroDeEntradas);
+        
         lerVeiculo_Terminal(&novoVeiculo);
+        imprimeVeiculo(novoVeiculo,header);
         salvaVeiculo(arquivoBin, &novoVeiculo,&header);  // salvo o novo veículo no fim do binário
     }
 

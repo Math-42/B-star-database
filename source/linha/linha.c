@@ -238,7 +238,6 @@ void CreateTable_Linha(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
 
     linhaHeader novoHeader;
     linha novaLinha;
-    int finalDoArquivo = 0;
 
     //valores iniciais do header
     novoHeader.status = '0';
@@ -249,8 +248,10 @@ void CreateTable_Linha(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
     lerHeaderCSV_Linha(arquivoCSV, &novoHeader);
     salvaHeader_Linha(arquivoBin, &novoHeader);
 
-    while (!finalDoArquivo) {
-        finalDoArquivo = lerLinha_CSV(arquivoCSV, &novaLinha);
+    int isFinalDoArquivo = finalDoArquivo(arquivoCSV);
+
+    while (!isFinalDoArquivo) {
+        isFinalDoArquivo = lerLinha_CSV(arquivoCSV, &novaLinha);
         salvaLinha(arquivoBin, &novaLinha, &novoHeader);
     }
     
