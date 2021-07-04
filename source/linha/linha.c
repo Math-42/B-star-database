@@ -281,10 +281,10 @@ void SelectFrom_Linha(char nomeArquivoBin[100]) {
     lerHeaderBin_Linha(arquivoBin, &novoHeader);
     if(!validaHeader_linha(&arquivoBin,novoHeader,1,1))return;
 
-    int finalDoArquivo = 0;
+    int isFinalDoArquivo = finalDoArquivo(arquivoBin);
 
-    while (!finalDoArquivo) {
-        finalDoArquivo = lerLinha_Bin(arquivoBin, &novaLinha);
+    while (!isFinalDoArquivo) {
+        isFinalDoArquivo = lerLinha_Bin(arquivoBin, &novaLinha);
         if (novaLinha.removido == '1') imprimeLinha(novaLinha, novoHeader);
     }
 

@@ -288,10 +288,10 @@ void SelectFrom_Veiculo(char nomeArquivoBin[100]) {
     lerHeaderBin_Veiculo(arquivoBin, &novoHeader);
     if(!validaHeader_veiculo(&arquivoBin,novoHeader,1,1))return;
 
-    int finalDoArquivo = 0;
+    int isFinalDoArquivo = finalDoArquivo(arquivoBin);
     //percorre todo o arquivo imprimindo apenas os registros salvos
-    while (!finalDoArquivo) {
-        finalDoArquivo = lerVeiculo_Bin(arquivoBin, &novoVeiculo);
+    while (!isFinalDoArquivo) {
+        isFinalDoArquivo = lerVeiculo_Bin(arquivoBin, &novoVeiculo);
         if (novoVeiculo.removido == '1') imprimeVeiculo(novoVeiculo,novoHeader);
     }
 
