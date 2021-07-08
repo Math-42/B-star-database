@@ -411,6 +411,11 @@ void InsertInto_Veiculo(char nomeArquivoBin[100], int numeroDeEntradas) {
     binarioNaTela(nomeArquivoBin);
 }
 
+/**
+ *  Cria um index a partir de um arquivo de registros
+ * @param nomeArquivoBinRegistros nome do arquivo binário dos registros
+ * @param nomeArquivoBinIndex nome do arquivo binário contendo os indices
+ */
 void CreateIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100]) {
     FILE* arquivoBinRegistros;
     if (!abrirArquivo(&arquivoBinRegistros, nomeArquivoBinRegistros, "rb", 1)) return;
@@ -424,8 +429,8 @@ void CreateIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArquivoBinI
     arvore* novaArvore = criaArvore(nomeArquivoBinIndex);
 
     int isFinalDoArquivo = finalDoArquivo(arquivoBinRegistros);
+    
     //percorre todo o arquivo salvando apenas os registros salvos
-
     while (!isFinalDoArquivo) {
         registro novoRegistro;
 
@@ -444,6 +449,12 @@ void CreateIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArquivoBinI
     binarioNaTela(nomeArquivoBinIndex);
 }
 
+/**
+ *  Busca um registro recursivamente a partir da arvore B
+ * @param nomeArquivoBinRegistros nome do arquivo binário dos registros
+ * @param nomeArquivoBinIndex nome do arquivo binário contendo os indices
+ * @param valorBuscado valor único que está sendo buscado
+ */
 void SelectFromWithIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100], char valorBuscado[6]) {
     FILE* arquivoBinRegistros;
     if (!abrirArquivo(&arquivoBinRegistros, nomeArquivoBinRegistros, "rb", 1)) return;
@@ -459,6 +470,8 @@ void SelectFromWithIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArq
 
     int chave = convertePrefixo(valorBuscado);
     int byteOffset = buscaRegistro(novaArvore, chave);
+
+    // testa se encontrou o registro
     if (byteOffset != -1) {
         lerVeiculo_Bin(arquivoBinRegistros, &novoVeiculo, byteOffset);
         imprimeVeiculo(novoVeiculo, novoHeader);

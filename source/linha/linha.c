@@ -291,7 +291,7 @@ void SelectFrom_Linha(char nomeArquivoBin[100]) {
  * varredura da posição do campo correspondente a ser buscado no cabeçalho, após
  * isso percorre os registros todos os dados nessa respectiva posição e então
  * compara com o valor procurado
- * @param nomeArquivoBIn nome do arquivo binário de onde os dados serão lidos
+ * @param nomeArquivoBin nome do arquivo binário de onde os dados serão lidos
  * @param campo nome do campo onde fara a busca
  * @param valor valor que está sendo buscado
  */
@@ -364,7 +364,8 @@ void SelectFromWhere_Linha(char nomeArquivoBin[100], char* campo, char* valor) {
  *  Efetua as leituras correspondentes usando o string_quote
  *  trata os espaços com lixo nas string fixas e salva os dados do novo veículo
  *  no fim do binário
- * @param nomeArquivoBIn nome do arquivo binário onde os valores serão salvos
+ * @param nomeArquivoBin nome do arquivo binário onde os valores serão salvos
+ * @param numeroDeEntradas quantidade de entradas que serão inseridas
  */
 void InsertInto_Linha(char nomeArquivoBin[100], int numeroDeEntradas) {
     FILE* arquivoBin;
@@ -394,6 +395,11 @@ void InsertInto_Linha(char nomeArquivoBin[100], int numeroDeEntradas) {
     binarioNaTela(nomeArquivoBin);
 }
 
+/**
+ *  Cria um index a partir de um arquivo de registros
+ * @param nomeArquivoBinRegistros nome do arquivo binário dos registros
+ * @param nomeArquivoBinIndex nome do arquivo binário contendo os indices
+ */
 void CreateIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100]) {
     FILE* arquivoBinRegistros;
     if (!abrirArquivo(&arquivoBinRegistros, nomeArquivoBinRegistros, "rb", 1)) return;
@@ -407,6 +413,7 @@ void CreateIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArquivoBinInd
     arvore* novaArvore = criaArvore(nomeArquivoBinIndex);
 
     int isFinalDoArquivo = finalDoArquivo(arquivoBinRegistros);
+    
     //percorre todo o arquivo salvando apenas os registros salvos
     while (!isFinalDoArquivo) {
         registro novoRegistro;
@@ -426,7 +433,13 @@ void CreateIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArquivoBinInd
     binarioNaTela(nomeArquivoBinIndex);
 }
 
-void SelectFromWithIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100], int valorBusca) {
+/**
+ *  Busca um registro recursivamente a partir da arvore B
+ * @param nomeArquivoBinRegistros nome do arquivo binário dos registros
+ * @param nomeArquivoBinIndex nome do arquivo binário contendo os indices
+ * @param valorBuscado valor único que está sendo buscado
+ */
+void SelectFromWithIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100], int valorBuscado) {
     FILE* arquivoBinRegistros;
     if (!abrirArquivo(&arquivoBinRegistros, nomeArquivoBinRegistros, "rb", 1)) return;
 
@@ -435,11 +448,13 @@ void SelectFromWithIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArqui
 
     lerHeaderBin_Linha(arquivoBinRegistros, &novoHeader);
     if (!validaHeader_linha(&arquivoBinRegistros, novoHeader, 1, 1)) return;
+
     arvore* novaArvore = carregaArvore(nomeArquivoBinIndex);
 
     int isFinalDoArquivo = finalDoArquivo(arquivoBinRegistros);
+    int byteOffset = buscaRegistro(novaArvore, valorBuscado);
 
-    int byteOffset = buscaRegistro(novaArvore, valorBusca);
+    // testa se encontrou o registro
     if (byteOffset != -1) {
         lerLinha_Bin(arquivoBinRegistros, &novaLinha, byteOffset);
         imprimeLinha(novaLinha, novoHeader);
