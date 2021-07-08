@@ -124,3 +124,44 @@ registro buscaBinariaRegistro(registro registros[], int chave, int tamanho) {
 
     return registros[indice];
 }
+
+registro* splitNo(arvore* currArvore, arvoreNo* currNo, registro novoRegistro) {
+    registro* registroEleito = (registro*)malloc(sizeof(registro));
+
+    //cria um novo nó a direita
+    //no caso no raiz=folha ele deixa de ser raiz e passa a ser folha
+    currNo->folha = currArvore->driver ? '1' : currNo->folha;
+    arvoreNo novoNoEsquerda = criarNovoNo(currNo->folha, currNo->RRNdoNo);
+    arvoreNo novoNoDireita = criarNovoNo(currNo->folha, currArvore->header.RRNproxNo);
+
+    //copia os antigos e insere o novo registro no array temporário, na ordem correta
+    registro* tempSplitArray = (registro*)malloc(ORDEM_ARVORE * sizeof(registro));
+    for (int i = 0; i < ORDEM_ARVORE - 1; i++) tempSplitArray[i] = currNo->registros[i];
+    insereRegistroOrdenado(tempSplitArray, novoRegistro, ORDEM_ARVORE - 1);
+
+    // distribui os registros,já ordenados, entre os dois nós
+    for (int i = 0; i < ORDEM_ARVORE / 2; i++) {
+        novoNoEsquerda.registros[i] = tempSplitArray[i];
+        novoNoEsquerda.nroChavesIndexadas++;
+    }
+
+    for (int i = ORDEM_ARVORE / 2 + 1, j = 0; i < ORDEM_ARVORE; i++, j++) {
+        novoNoDireita.registros[j] = tempSplitArray[i];
+        novoNoDireita.nroChavesIndexadas++;
+    }
+
+    salvaNoArvore(currArvore, &novoNoEsquerda, novoNoEsquerda.RRNdoNo);
+    salvaNoArvore(currArvore, &novoNoDireita, novoNoDireita.RRNdoNo);
+
+    // elege um registro
+    registroEleito->C = tempSplitArray[ORDEM_ARVORE / 2].C;
+    registroEleito->Pr = tempSplitArray[ORDEM_ARVORE / 2].Pr;
+    registroEleito->P_ant = novoNoEsquerda.RRNdoNo;
+    registroEleito->P_prox = novoNoDireita.RRNdoNo;
+
+    free(tempSplitArray);
+    currArvore->driver = 0;
+    currArvore->header.RRNproxNo++;
+
+    return registroEleito;
+}
