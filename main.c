@@ -7,7 +7,6 @@
  * Maio/2021                                                                   *    
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -16,7 +15,6 @@
 #include "source/veiculo/veiculo.h"
 
 void menu() {
-
     int funcionalidade, numeroDeEntradas;
     char nomeArquivoCSV[100];
     char nomeArquivoBin[100];
@@ -25,7 +23,7 @@ void menu() {
     char valorBuscado[100];
 
     //scanf("%d", &funcionalidade);//le o modo que o programa deve operar
-    funcionalidade = 9;
+    funcionalidade = 12;
     switch (funcionalidade) {
         case 1:
             scanf("%s %s", nomeArquivoCSV, nomeArquivoBin);
@@ -74,9 +72,28 @@ void menu() {
             return;
             break;
         case 9:
-            //scanf("%s", nomeArquivoBin);
-            //scanf("%s", nomeArquivoBinIndice);
-            CreateIndex_Veiculo("aasd", "asd");
+            scanf("%s", nomeArquivoBin);
+            scanf("%s", nomeArquivoBinIndice);
+            CreateIndex_Veiculo(nomeArquivoBin, nomeArquivoBinIndice);
+            return;
+            break;
+        case 10:
+            scanf("%s", nomeArquivoBin);
+            scanf("%s", nomeArquivoBinIndice);
+            CreateIndex_Linha(nomeArquivoBin, nomeArquivoBinIndice);
+            return;
+            break;
+        case 11:
+            scanf("%s", nomeArquivoBin);
+            scanf("%s", nomeArquivoBinIndice);
+            scanf("%s", valorBuscado);
+            SelectFromWithIndex_Veiculo(nomeArquivoBin, nomeArquivoBinIndice, valorBuscado);
+            return;
+            break;
+        case 12:
+            // scanf("%s", nomeArquivoBin);
+            // scanf("%s", nomeArquivoBinIndice);
+            SelectFromWithIndex_Linha("linha11.bin", "indicePrefixo11.bin", 0);
             return;
             break;
         default:
