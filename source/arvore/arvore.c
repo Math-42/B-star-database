@@ -1,3 +1,68 @@
+void imprimeHeader(arvore* currArvore) {
+    printf("============== HEADER ==============\n");
+    printf("status: %c\n", currArvore->header.status);
+    printf("noRaiz: %d\n", currArvore->header.noRaiz);
+    printf("RRNproxNo: %d\n", currArvore->header.RRNproxNo);
+    printf("lixo: %s\n", currArvore->header.lixo);
+    printf("====================================\n");
+}
+
+void imprimeArvore(arvore* currArvore) {
+    printf("driver: %d\n", currArvore->driver);
+    imprimeHeader(currArvore);
+}
+
+void imprimeNo(arvoreNo* no) {
+    printf("%d:|", no->RRNdoNo);
+    printf("F: %c ", no->folha);
+    printf("N: %d|", no->nroChavesIndexadas);
+
+    for (int i = 0; i < ORDEM_ARVORE - 1; i++) {
+        printf(" %d:", i);
+        printf("[(%d,", no->registros[i].P_ant);
+        printf("%d), ", no->registros[i].P_prox);
+        printf("%c->", no->registros[i].C);
+        printf("%ld]", no->registros[i].Pr);
+    }
+    printf("\n\n");
+}
+
+void imprimeRegistro(registro* registroEleito) {
+    printf("\nREGISTRO ELEITO:");
+    printf("[(%d,", registroEleito->P_ant);
+    printf("%d), ", registroEleito->P_prox);
+    printf("%c->", registroEleito->C);
+    printf("%ld]\n", registroEleito->Pr);
+}
+
+void imprimeNoRecursivo(arvore* currArvore, arvoreNo* no, int depth) {
+    printf("%*d:|", depth, no->RRNdoNo);
+    printf("F: %c ", no->folha);
+    printf("N: %d|", no->nroChavesIndexadas);
+
+    for (int i = 0; i < ORDEM_ARVORE - 1; i++) {
+        printf(" %d:", i);
+        printf("[(%d,", no->registros[i].P_ant);
+        printf("%d), ", no->registros[i].P_prox);
+        printf("%C->", no->registros[i].C);
+        printf("%ld]", no->registros[i].Pr);
+    }
+    printf("\n");
+
+    for (int i = 0; i < ORDEM_ARVORE - 1; i++) {
+        if (no->registros[i].C != -1 && no->registros[i].P_ant != -1) {
+            arvoreNo proxNo;
+            lerNoArvore(currArvore, &proxNo, no->registros[i].P_ant);
+            imprimeNoRecursivo(currArvore, &proxNo, depth + 3);
+        }
+    }
+    if (no->registros[no->nroChavesIndexadas - 1].P_prox != -1) {
+        arvoreNo proxNo;
+        lerNoArvore(currArvore, &proxNo, no->registros[no->nroChavesIndexadas - 1].P_prox);
+        imprimeNoRecursivo(currArvore, &proxNo, depth + 3);
+    }
+}
+
 arvore* criaArvore(char nomeArquivoIndice[]) {
     arvore* novaArvore = (arvore*)malloc(sizeof(arvore));
 
