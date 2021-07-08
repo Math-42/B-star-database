@@ -32,10 +32,10 @@ typedef struct arvore{
 	FILE* arquivoIndice;
 	arvoreHeader header;
 	arvoreNo raiz;
-	int driver;
 } arvore;
 
 arvore* criaArvore(char* nomeArquivoIndice);
+arvore* carregaArvore(char* nomeArquivoIndice);
 
 void lerHeaderArvore(FILE* arquivoIndice, arvoreHeader* header);
 void salvaHeaderArvore(arvore *currArvore);

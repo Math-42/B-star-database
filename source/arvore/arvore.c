@@ -129,6 +129,20 @@ void leHeaderArvore(FILE* arquivoIndice, arvoreHeader* header) {
     fread(&header->lixo, sizeof(char), 68, arquivoIndice);
 }
 
+arvore* carregaArvore(char nomeArquivoIndice[]) {
+    arvore* novaArvore = (arvore*)malloc(sizeof(arvore));
+
+    novaArvore->arquivoIndice = fopen(nomeArquivoIndice, "r+");
+    if (novaArvore->arquivoIndice == NULL) printf("Arquivo nulo \n");
+    leHeaderArvore(novaArvore->arquivoIndice, &novaArvore->header);
+
+    lerNoArvore(novaArvore, &novaArvore->raiz, novaArvore->header.noRaiz);
+
+    imprimeArvore(novaArvore);
+
+    return novaArvore;
+}
+
 void lerNoArvore(arvore* currArvore, arvoreNo* novoNo, int RRN) {
     fseek(currArvore->arquivoIndice, (RRN + 1) * 77, 0);
 
@@ -250,7 +264,7 @@ registro* buscaInsersaoRecursao(arvore* currArvore, arvoreNo* currNo, registro n
     if (currNo->folha == '1' || currArvore->header.noRaiz == 0) {
         return insereNovoRegistro(currArvore, currNo, novoRegistro);
     }
-    
+
     arvoreNo proxNo;
     registro registroPai = buscaBinariaRegistro(currNo->registros, novoRegistro.C, currNo->nroChavesIndexadas);
     int RRNproxReg = registroPai.C > novoRegistro.C ? registroPai.P_ant : registroPai.P_prox;
