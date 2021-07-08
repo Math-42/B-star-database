@@ -73,9 +73,11 @@ int lerVeiculo_CSV(FILE* arquivoCSV, veiculo* novoVeiculo) {
  * de registro total e dos campos variaveis
  * @param arquivoBin nome do arquivo binário fonte dos dados
  * @param currV variavel para salvar os dados
+ * @param pos indica se deve ler o próximo registro (-1) ou algum em especifico
  * @return retorna 1 caso for o ultimo registro e 0 caso contrário
  */
-int lerVeiculo_Bin(FILE* arquivoBin, veiculo* currV) {
+int lerVeiculo_Bin(FILE* arquivoBin, veiculo* currV, long int pos) {
+    if (pos != -1) fseek(arquivoBin, pos, 0);
     lerStringBin(arquivoBin, &currV->removido, 1);
     currV->tamanhoRegistro = lerInteiroBin(arquivoBin);
 
@@ -288,7 +290,7 @@ void SelectFrom_Veiculo(char nomeArquivoBin[100]) {
     int isFinalDoArquivo = finalDoArquivo(arquivoBin);
     //percorre todo o arquivo imprimindo apenas os registros salvos
     while (!isFinalDoArquivo) {
-        isFinalDoArquivo = lerVeiculo_Bin(arquivoBin, &novoVeiculo);
+        isFinalDoArquivo = lerVeiculo_Bin(arquivoBin, &novoVeiculo, -1);
         if (novoVeiculo.removido == '1') imprimeVeiculo(novoVeiculo, novoHeader);
     }
 
@@ -336,7 +338,7 @@ void SelectFromWhere_Veiculo(char nomeArquivoBin[100], char* campo, char* valor)
                           // valores lido em cada registro do binario
 
     while (total--) {  // percorro todos registros de dados
-        lerVeiculo_Bin(arquivoBin, &veiculoTemp);
+        lerVeiculo_Bin(arquivoBin, &veiculoTemp, -1);
         int existe = 0;
         if (veiculoTemp.removido == '0') continue;  // veiculo ja removido
 
@@ -431,7 +433,7 @@ void CreateIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArquivoBinI
         novoRegistro.P_prox = -1;
         novoRegistro.Pr = ftell(arquivoBinRegistros);
 
-        isFinalDoArquivo = lerVeiculo_Bin(arquivoBinRegistros, &novoVeiculo);
+        isFinalDoArquivo = lerVeiculo_Bin(arquivoBinRegistros, &novoVeiculo, -1);
         novoRegistro.C = convertePrefixo(novoVeiculo.prefixo);
 
         if (novoVeiculo.removido == '1') insereRegistro(novaArvore, novoRegistro);
@@ -440,4 +442,30 @@ void CreateIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArquivoBinI
     fclose(arquivoBinRegistros);
     finalizaArvore(novaArvore);
     binarioNaTela(nomeArquivoBinIndex);
+}
+
+void SelectFromWithIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100], char valorBuscado[6]) {
+    FILE* arquivoBinRegistros;
+    if (!abrirArquivo(&arquivoBinRegistros, nomeArquivoBinRegistros, "rb", 1)) return;
+
+    veiculoHeader novoHeader;
+    veiculo novoVeiculo;
+
+    lerHeaderBin_Veiculo(arquivoBinRegistros, &novoHeader);
+    if (!validaHeader_veiculo(&arquivoBinRegistros, novoHeader, 1, 1)) return;
+
+    arvore* novaArvore = carregaArvore(nomeArquivoBinIndex);
+    int isFinalDoArquivo = finalDoArquivo(arquivoBinRegistros);
+
+    int chave = convertePrefixo(valorBuscado);
+    int byteOffset = buscaRegistro(novaArvore, chave);
+    if (byteOffset != -1) {
+        lerVeiculo_Bin(arquivoBinRegistros, &novoVeiculo, byteOffset);
+        imprimeVeiculo(novoVeiculo, novoHeader);
+    } else {
+        printf("Registro inexistente.");
+    }
+
+    fclose(arquivoBinRegistros);
+    finalizaArvore(novaArvore);
 }

@@ -35,5 +35,6 @@ void CreateTable_Veiculo(char nomeArquivoCSV[100], char nomeArquivoBin[100]);
 void SelectFromWhere_Veiculo(char nomeArquivoBin[100], char* campo, char* valor);
 void InsertInto_Veiculo(char nomeArquivoBin[100], int numeroDeEntradas);
 void CreateIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100]);
+void SelectFromWithIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100], char valorBuscado[6]);
 
 #endif
