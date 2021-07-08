@@ -9,11 +9,6 @@ void imprimeHeader(arvore* currArvore) {
     printf("====================================\n");
 }
 
-void imprimeArvore(arvore* currArvore) {
-    printf("driver: %d\n", currArvore->driver);
-    imprimeHeader(currArvore);
-}
-
 void imprimeNo(arvoreNo* no) {
     printf("%d:|", no->RRNdoNo);
     printf("F: %c ", no->folha);
@@ -23,7 +18,7 @@ void imprimeNo(arvoreNo* no) {
         printf(" %d:", i);
         printf("[(%d,", no->registros[i].P_ant);
         printf("%d), ", no->registros[i].P_prox);
-        printf("%c->", no->registros[i].C);
+        printf("%d->", no->registros[i].C);
         printf("%ld]", no->registros[i].Pr);
     }
     printf("\n\n");
@@ -38,7 +33,12 @@ void imprimeRegistro(registro* registroEleito) {
 }
 
 void imprimeNoRecursivo(arvore* currArvore, arvoreNo* no, int depth) {
-    printf("%*d:|", depth, no->RRNdoNo);
+    if (depth != 0)
+        printf("%*c└", (depth), ' ');
+
+    printf("%4d:|", no->RRNdoNo);
+
+    //printf("%*d:|", depth, no->RRNdoNo);
     printf("F: %c ", no->folha);
     printf("N: %d|", no->nroChavesIndexadas);
 
@@ -46,7 +46,7 @@ void imprimeNoRecursivo(arvore* currArvore, arvoreNo* no, int depth) {
         printf(" %d:", i);
         printf("[(%d,", no->registros[i].P_ant);
         printf("%d), ", no->registros[i].P_prox);
-        printf("%C->", no->registros[i].C);
+        printf("%d->", no->registros[i].C);
         printf("%ld]", no->registros[i].Pr);
     }
     printf("\n");
@@ -55,14 +55,20 @@ void imprimeNoRecursivo(arvore* currArvore, arvoreNo* no, int depth) {
         if (no->registros[i].C != -1 && no->registros[i].P_ant != -1) {
             arvoreNo proxNo;
             lerNoArvore(currArvore, &proxNo, no->registros[i].P_ant);
-            imprimeNoRecursivo(currArvore, &proxNo, depth + 3);
+            imprimeNoRecursivo(currArvore, &proxNo, depth + 6);
         }
     }
     if (no->registros[no->nroChavesIndexadas - 1].P_prox != -1) {
         arvoreNo proxNo;
         lerNoArvore(currArvore, &proxNo, no->registros[no->nroChavesIndexadas - 1].P_prox);
-        imprimeNoRecursivo(currArvore, &proxNo, depth + 3);
+        imprimeNoRecursivo(currArvore, &proxNo, depth + 6);
     }
+}
+
+void imprimeArvore(arvore* currArvore) {
+    printf("raiz: %d\n", currArvore->header.noRaiz);
+    imprimeHeader(currArvore);
+    imprimeNoRecursivo(currArvore, &currArvore->raiz, 0);
 }
 
 arvore* criaArvore(char nomeArquivoIndice[]) {
