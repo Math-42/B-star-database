@@ -2,7 +2,7 @@
 #define _VEICULO_H_
 #include <stdio.h>
 
-typedef struct veiculoHeader{
+typedef struct veiculoHeader {
     char status;
     long int byteProxReg;
     int nroRegistros;
@@ -16,7 +16,7 @@ typedef struct veiculoHeader{
 
 } veiculoHeader;
 
-typedef struct veiculo{
+typedef struct veiculo {
     char removido;
     int tamanhoRegistro;
     char prefixo[6];
@@ -29,11 +29,11 @@ typedef struct veiculo{
     char categoria[100];
 } veiculo;
 
-
 //Apenas as funcionalidades são expostas pela biblioteca
 void SelectFrom_Veiculo(char nomeArquivoBin[100]);
 void CreateTable_Veiculo(char nomeArquivoCSV[100], char nomeArquivoBin[100]);
-void SelectFromWhere_Veiculo(char nomeArquivoBin[100], char* campo, char*valor);
+void SelectFromWhere_Veiculo(char nomeArquivoBin[100], char* campo, char* valor);
 void InsertInto_Veiculo(char nomeArquivoBin[100], int numeroDeEntradas);
+void CreateIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100]);
 
 #endif

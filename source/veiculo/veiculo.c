@@ -7,11 +7,11 @@
 #include "../binario/binario.h"
 #include "../csv/csv.h"
 #include "../utils/utils.h"
+#include "../arvore/arvore.h"
 
-char MESES[][12] = {"janeiro",  "fevereiro", "março",    "abril",
-                    "maio",     "junho",     "julho",    "agosto",
-                    "setembro", "outubro",   "novembro", "dezembro"}; // todos os meses
-
+char MESES[][12] = {"janeiro", "fevereiro", "março", "abril",
+                    "maio", "junho", "julho", "agosto",
+                    "setembro", "outubro", "novembro", "dezembro"};  // todos os meses
 
 /**
  *  Valida o header de um arquivo
@@ -21,20 +21,20 @@ char MESES[][12] = {"janeiro",  "fevereiro", "março",    "abril",
  * @param verificaRegistros flag que indica para verificar se existem registros
  * @return retorna 1 caso o arquivo passe nos testes exigidos
  */
-int validaHeader_veiculo(FILE** arquivo, veiculoHeader header, int verificaConsistencia, int verificaRegistros){
-    
+int validaHeader_veiculo(FILE** arquivo, veiculoHeader header, int verificaConsistencia, int verificaRegistros) {
     int correto = 1;
 
-    if (verificaConsistencia>0 && header.status == '0') {
+    if (verificaConsistencia > 0 && header.status == '0') {
         printf("Falha no processamento do arquivo.");
         correto = 0;
     }
 
-    if (verificaRegistros>0 && header.nroRegistros == 0) {
+    if (verificaRegistros > 0 && header.nroRegistros == 0) {
         printf("Registro inexistente.");
-        correto = 0;;
+        correto = 0;
+        ;
     }
-    if(!correto)fclose(*arquivo);
+    if (!correto) fclose(*arquivo);
     return correto;
 }
 
@@ -43,7 +43,7 @@ int validaHeader_veiculo(FILE** arquivo, veiculoHeader header, int verificaConsi
  * de registro total e dos campos variaveis
  * @param arquivoCSV nome do arquivo csv fonte dos dados
  * @param novoVeiculo variavel para salvar os dados
- * @return retorna 1 caso for o utimo registro e 0 caso contrário
+ * @return retorna 1 caso for o ultimo registro e 0 caso contrário
  */
 int lerVeiculo_CSV(FILE* arquivoCSV, veiculo* novoVeiculo) {
     int tamanhoRegistro = 0;
@@ -73,7 +73,7 @@ int lerVeiculo_CSV(FILE* arquivoCSV, veiculo* novoVeiculo) {
  * de registro total e dos campos variaveis
  * @param arquivoBin nome do arquivo binário fonte dos dados
  * @param currV variavel para salvar os dados
- * @return retorna 1 caso for o utimo registro e 0 caso contrário
+ * @return retorna 1 caso for o ultimo registro e 0 caso contrário
  */
 int lerVeiculo_Bin(FILE* arquivoBin, veiculo* currV) {
     lerStringBin(arquivoBin, &currV->removido, 1);
@@ -103,16 +103,16 @@ void lerVeiculo_Terminal(veiculo* currV) {
     currV->tamanhoRegistro = 0;
     currV->removido = '1';
 
-    lerStringTerminalFixa(currV->prefixo,5);
-    lerStringTerminalFixa(currV->data,10);
+    lerStringTerminalFixa(currV->prefixo, 5);
+    lerStringTerminalFixa(currV->data, 10);
 
     scanf("%d", &currV->quantidadeLugares);
-    scanf("%d", & currV->codLinha);
+    scanf("%d", &currV->codLinha);
 
     currV->tamanhoModelo = lerStringTerminal(currV->modelo);
     currV->tamanhoCategoria = lerStringTerminal(currV->categoria);
 
-    currV->tamanhoRegistro =  currV->tamanhoModelo + currV->tamanhoCategoria;
+    currV->tamanhoRegistro = currV->tamanhoModelo + currV->tamanhoCategoria;
     currV->tamanhoRegistro += 31;  // tamanho da parte fixa da struct
 }
 
@@ -121,12 +121,12 @@ void lerVeiculo_Terminal(veiculo* currV) {
  * @param descricao descricao do campo
  * @param stringData string original no formato salvo
  */
-void imprimeData(char* descricao,char* stringData) {
-    printf("%s: ",descricao);
-    if (stringData[0] != '\0') {//testa se a data é nula
+void imprimeData(char* descricao, char* stringData) {
+    printf("%s: ", descricao);
+    if (stringData[0] != '\0') {  //testa se a data é nula
         int indiceDoMes =
-            (stringData[5] - '0') * 10 + (stringData[6] - '0') -1;  // calcula o indice do mes e translada para entre 0-11
-        printf("%.2s de %s de %.4s\n", stringData + 8, MESES[indiceDoMes],stringData);
+            (stringData[5] - '0') * 10 + (stringData[6] - '0') - 1;  // calcula o indice do mes e translada para entre 0-11
+        printf("%.2s de %s de %.4s\n", stringData + 8, MESES[indiceDoMes], stringData);
     } else {
         printf("campo com valor nulo\n");
     }
@@ -141,8 +141,8 @@ void imprimeVeiculo(veiculo currVeiculo, veiculoHeader header) {
     imprimirCampo(header.descrevePrefixo, currVeiculo.prefixo, 0);
     imprimirCampo(header.descreveModelo, currVeiculo.modelo, 0);
     imprimirCampo(header.descreveCategoria, currVeiculo.categoria, 0);
-    imprimeData(header.descreveData, currVeiculo.data);//impressão diferente devido ao formato
-    imprimirCampo(header.descreveLugares,&currVeiculo.quantidadeLugares, 1);
+    imprimeData(header.descreveData, currVeiculo.data);  //impressão diferente devido ao formato
+    imprimirCampo(header.descreveLugares, &currVeiculo.quantidadeLugares, 1);
     printf("\n");
 }
 
@@ -167,7 +167,7 @@ void salvaVeiculo(FILE* arquivoBin, veiculo* currV, veiculoHeader* header) {
     fwrite(&currV->modelo, sizeof(char), currV->tamanhoModelo, arquivoBin);
 
     fwrite(&currV->tamanhoCategoria, sizeof(int), 1, arquivoBin);
-    fwrite(&currV->categoria, sizeof(char), currV->tamanhoCategoria,arquivoBin);
+    fwrite(&currV->categoria, sizeof(char), currV->tamanhoCategoria, arquivoBin);
 
     header->byteProxReg = ftell(arquivoBin);
     header->nroRegRemovidos += (currV->removido == '0') ? 1 : 0;
@@ -200,12 +200,12 @@ void lerHeaderBin_Veiculo(FILE* arquivoBin, veiculoHeader* header) {
     fread(&header->byteProxReg, sizeof(long int), 1, arquivoBin);
     fread(&header->nroRegistros, sizeof(int), 1, arquivoBin);
     fread(&header->nroRegRemovidos, sizeof(int), 1, arquivoBin);
-    lerStringBin(arquivoBin,header->descrevePrefixo, 18);
-    lerStringBin(arquivoBin,header->descreveData, 35);
-    lerStringBin(arquivoBin,header->descreveLugares, 42);
-    lerStringBin(arquivoBin,header->descreveLinha, 26);
-    lerStringBin(arquivoBin,header->descreveModelo, 17);
-    lerStringBin(arquivoBin,header->descreveCategoria, 20);
+    lerStringBin(arquivoBin, header->descrevePrefixo, 18);
+    lerStringBin(arquivoBin, header->descreveData, 35);
+    lerStringBin(arquivoBin, header->descreveLugares, 42);
+    lerStringBin(arquivoBin, header->descreveLinha, 26);
+    lerStringBin(arquivoBin, header->descreveModelo, 17);
+    lerStringBin(arquivoBin, header->descreveCategoria, 20);
 }
 
 /**
@@ -237,14 +237,12 @@ void CreateTable_Veiculo(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
     FILE* arquivoBin;
     FILE* arquivoCSV;
 
-    if(!abrirArquivo(&arquivoCSV,nomeArquivoCSV,"r",1))return;
-    
-    abrirArquivo(&arquivoBin,nomeArquivoBin,"wb",0);
-    
-    
+    if (!abrirArquivo(&arquivoCSV, nomeArquivoCSV, "r", 1)) return;
+
+    abrirArquivo(&arquivoBin, nomeArquivoBin, "wb", 0);
+
     veiculoHeader novoHeader;
     veiculo novoVeiculo;
-    
 
     //definindo valores iniciais do header
     novoHeader.status = '0';
@@ -254,7 +252,7 @@ void CreateTable_Veiculo(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
 
     lerHeaderCSV_Veiculo(arquivoCSV, &novoHeader);
     salvaHeader_Veiculo(arquivoBin, &novoHeader);
-    
+
     int isFinalDoArquivo = finalDoArquivo(arquivoCSV);
     //percorre o arquivo até o final
     while (!isFinalDoArquivo) {
@@ -264,7 +262,7 @@ void CreateTable_Veiculo(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
 
     novoHeader.status = '1';
 
-    salvaHeader_Veiculo(arquivoBin, &novoHeader);//finaliza e salva o header
+    salvaHeader_Veiculo(arquivoBin, &novoHeader);  //finaliza e salva o header
 
     //fecha todos arquivos abertos
     fclose(arquivoBin);
