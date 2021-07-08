@@ -138,8 +138,6 @@ arvore* carregaArvore(char nomeArquivoIndice[]) {
 
     lerNoArvore(novaArvore, &novaArvore->raiz, novaArvore->header.noRaiz);
 
-    imprimeArvore(novaArvore);
-
     return novaArvore;
 }
 
@@ -271,7 +269,7 @@ registro* buscaInsersaoRecursao(arvore* currArvore, arvoreNo* currNo, registro n
     lerNoArvore(currArvore, &proxNo, RRNproxReg);
 
     registro* registroEleito = buscaInsersaoRecursao(currArvore, &proxNo, novoRegistro);
-    
+
     if (registroEleito != NULL) {
         registro* novoRegistroEleito = insereNovoRegistro(currArvore, currNo, *registroEleito);
         free(registroEleito);
@@ -297,4 +295,26 @@ void insereRegistro(arvore* currArvore, registro novoRegistro) {
         insereNovoRegistro(currArvore, &currArvore->raiz, *registroEleitoParaRaiz);
         free(registroEleitoParaRaiz);
     }
+}
+
+long int buscaRegistroRecursao(arvore* currArvore, arvoreNo* currNo, int chaveRegistro) {
+    registro registroPai = buscaBinariaRegistro(currNo->registros, chaveRegistro, currNo->nroChavesIndexadas);
+    if (registroPai.C == chaveRegistro) return registroPai.Pr;
+
+    int RRNproxReg = registroPai.C > chaveRegistro ? registroPai.P_ant : registroPai.P_prox;
+
+    if (RRNproxReg == -1) {
+        return -1;
+    } else {
+        arvoreNo proxNo;
+        lerNoArvore(currArvore, &proxNo, RRNproxReg);
+        return buscaRegistroRecursao(currArvore, &proxNo, chaveRegistro);
+    }
+}
+
+long int buscaRegistro(arvore* currArvore, int chave) {
+    if (currArvore->header.noRaiz == -1) {
+        return -1;
+    }
+    return buscaRegistroRecursao(currArvore, &currArvore->raiz, chave);
 }

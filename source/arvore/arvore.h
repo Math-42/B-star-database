@@ -43,6 +43,7 @@ void imprimeArvore(arvore *currArvore);
 
 void lerNoArvore(arvore* currArvore, arvoreNo* novoNo, int RRN);
 void insereRegistro(arvore* currArvore, registro novoRegistro);
+long int buscaRegistro(arvore* currArvore, int chave);
 void leRegistro(FILE* arquivoIndice, arvoreNo* registro);
 void finalizaArvore(arvore *currArvore);
 
