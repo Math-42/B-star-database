@@ -1,7 +1,7 @@
 #ifndef _LINHA_H_
 #define _LINHA_H_
 #include <stdio.h>
-typedef struct linhaHeader{
+typedef struct linhaHeader {
     char status;
     long int byteProxReg;
     int nroRegistros;
@@ -12,11 +12,11 @@ typedef struct linhaHeader{
     char descreveLinha[25];
 } linhaHeader;
 
-typedef struct linha{
+typedef struct linha {
     char removido;
     int tamanhoRegistro;
     int codLinha;
-    char aceitaCartao[5];//Precaução para possiveis valores nulos "NULO\0"
+    char aceitaCartao[5];  //Precaução para possiveis valores nulos "NULO\0"
     int tamanhoNome;
     char nomeLinha[100];
     int tamanhoCor;
@@ -26,7 +26,7 @@ typedef struct linha{
 //Apenas as funcionalidades são expostas pela biblioteca
 void SelectFrom_Linha(char nomeArquivoBin[100]);
 void CreateTable_Linha(char nomeArquivoCSV[100], char nomeArquivoBin[100]);
-void SelectFromWhere_Linha(char nomeArquivoBin[100], char* campo, char*valor);
+void SelectFromWhere_Linha(char nomeArquivoBin[100], char* campo, char* valor);
 void InsertInto_Linha(char nomeArquivoBin[100], int numeroDeEntradas);
 
 #endif
