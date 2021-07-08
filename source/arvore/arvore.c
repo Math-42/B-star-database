@@ -133,8 +133,8 @@ void lerNoArvore(arvore* currArvore, arvoreNo* novoNo, int RRN) {
     fseek(currArvore->arquivoIndice, (RRN + 1) * 77, 0);
 
     fread(&novoNo->folha, sizeof(char), 1, currArvore->arquivoIndice);
-    fread(&novoNo->RRNdoNo, sizeof(int), 1, currArvore->arquivoIndice);
     fread(&novoNo->nroChavesIndexadas, sizeof(int), 1, currArvore->arquivoIndice);
+    fread(&novoNo->RRNdoNo, sizeof(int), 1, currArvore->arquivoIndice);
 
     fread(&novoNo->registros[0].P_ant, sizeof(int), 1, currArvore->arquivoIndice);
 
@@ -153,8 +153,8 @@ void salvaNoArvore(arvore* currArvore, arvoreNo* novoNo, int RRN) {
     fseek(currArvore->arquivoIndice, (RRN + 1) * 77, 0);
 
     fwrite(&novoNo->folha, sizeof(char), 1, currArvore->arquivoIndice);
-    fwrite(&novoNo->RRNdoNo, sizeof(int), 1, currArvore->arquivoIndice);
     fwrite(&novoNo->nroChavesIndexadas, sizeof(int), 1, currArvore->arquivoIndice);
+    fwrite(&novoNo->RRNdoNo, sizeof(int), 1, currArvore->arquivoIndice);
 
     fwrite(&novoNo->registros[0].P_ant, sizeof(int), 1, currArvore->arquivoIndice);
 
