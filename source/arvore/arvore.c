@@ -230,3 +230,15 @@ registro* splitNo(arvore* currArvore, arvoreNo* currNo, registro novoRegistro) {
 
     return registroEleito;
 }
+
+registro* insereNovoRegistro(arvore* currArvore, arvoreNo* currNo, registro novoRegistro) {
+    if (currNo->nroChavesIndexadas < ORDEM_ARVORE - 1) {
+        insereRegistroOrdenado(currNo->registros, novoRegistro, currNo->nroChavesIndexadas);
+        currNo->nroChavesIndexadas++;
+        salvaNoArvore(currArvore, currNo, currNo->RRNdoNo);
+        return NULL;
+    } else {
+        return splitNo(currArvore, currNo, novoRegistro);
+    }
+}
+
