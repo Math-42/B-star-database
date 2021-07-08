@@ -77,12 +77,10 @@ arvore* criaArvore(char nomeArquivoIndice[]) {
     novaArvore->header.status = '1';
     novaArvore->header.noRaiz = -1;
     novaArvore->header.RRNproxNo = 0;
-    novaArvore->driver = 1;
 
     for (int i = 0; i < 68; i++) novaArvore->header.lixo[i] = '@';
 
     novaArvore->arquivoIndice = fopen(nomeArquivoIndice, "w+");
-    if (novaArvore->arquivoIndice == NULL) printf("Arquivo nulo \n");
     salvaHeaderArvore(novaArvore);
 
     return novaArvore;
@@ -114,7 +112,6 @@ arvoreNo criarNovoNo(char isFolha, int RRndoNo) {
 }
 
 void salvaHeaderArvore(arvore* currArvore) {
-    if (currArvore->arquivoIndice == NULL) printf("null");
     fseek(currArvore->arquivoIndice, 0, 0);
 
     fwrite(&currArvore->header.status, sizeof(char), 1, currArvore->arquivoIndice);
@@ -203,7 +200,7 @@ registro* splitNo(arvore* currArvore, arvoreNo* currNo, registro novoRegistro) {
 
     //cria um novo nó a direita
     //no caso no raiz=folha ele deixa de ser raiz e passa a ser folha
-    currNo->folha = currArvore->driver ? '1' : currNo->folha;
+    currNo->folha = (currArvore->header.noRaiz == 0) ? '1' : currNo->folha;
     arvoreNo novoNoEsquerda = criarNovoNo(currNo->folha, currNo->RRNdoNo);
     arvoreNo novoNoDireita = criarNovoNo(currNo->folha, currArvore->header.RRNproxNo);
 
@@ -233,7 +230,6 @@ registro* splitNo(arvore* currArvore, arvoreNo* currNo, registro novoRegistro) {
     registroEleito->P_prox = novoNoDireita.RRNdoNo;
 
     free(tempSplitArray);
-    currArvore->driver = 0;
     currArvore->header.RRNproxNo++;
 
     return registroEleito;
@@ -251,16 +247,17 @@ registro* insereNovoRegistro(arvore* currArvore, arvoreNo* currNo, registro novo
 }
 
 registro* buscaInsersaoRecursao(arvore* currArvore, arvoreNo* currNo, registro novoRegistro) {
-    if (currNo->folha == '1' || currArvore->driver) {
+    if (currNo->folha == '1' || currArvore->header.noRaiz == 0) {
         return insereNovoRegistro(currArvore, currNo, novoRegistro);
     }
+    
     arvoreNo proxNo;
-
     registro registroPai = buscaBinariaRegistro(currNo->registros, novoRegistro.C, currNo->nroChavesIndexadas);
-
     int RRNproxReg = registroPai.C > novoRegistro.C ? registroPai.P_ant : registroPai.P_prox;
     lerNoArvore(currArvore, &proxNo, RRNproxReg);
+
     registro* registroEleito = buscaInsersaoRecursao(currArvore, &proxNo, novoRegistro);
+    
     if (registroEleito != NULL) {
         registro* novoRegistroEleito = insereNovoRegistro(currArvore, currNo, *registroEleito);
         free(registroEleito);
@@ -286,6 +283,4 @@ void insereRegistro(arvore* currArvore, registro novoRegistro) {
         insereNovoRegistro(currArvore, &currArvore->raiz, *registroEleitoParaRaiz);
         free(registroEleitoParaRaiz);
     }
-
-    imprimeNoRecursivo(currArvore, &currArvore->raiz, 0);
 }
