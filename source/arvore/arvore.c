@@ -242,3 +242,21 @@ registro* insereNovoRegistro(arvore* currArvore, arvoreNo* currNo, registro novo
     }
 }
 
+registro* buscaInsersaoRecursao(arvore* currArvore, arvoreNo* currNo, registro novoRegistro) {
+    if (currNo->folha == '1' || currArvore->driver) {
+        return insereNovoRegistro(currArvore, currNo, novoRegistro);
+    }
+    arvoreNo proxNo;
+
+    registro registroPai = buscaBinariaRegistro(currNo->registros, novoRegistro.C, currNo->nroChavesIndexadas);
+
+    int RRNproxReg = registroPai.C > novoRegistro.C ? registroPai.P_ant : registroPai.P_prox;
+    lerNoArvore(currArvore, &proxNo, RRNproxReg);
+    registro* registroEleito = buscaInsersaoRecursao(currArvore, &proxNo, novoRegistro);
+    if (registroEleito != NULL) {
+        registro* novoRegistroEleito = insereNovoRegistro(currArvore, currNo, *registroEleito);
+        free(registroEleito);
+        return novoRegistroEleito;
+    }
+}
+
