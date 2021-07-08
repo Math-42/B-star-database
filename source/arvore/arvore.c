@@ -23,6 +23,23 @@ void finalizaArvore(arvore* currArvore) {
     free(currArvore);
 }
 
+arvoreNo criarNovoNo(char isFolha, int RRndoNo) {
+    arvoreNo noCriado;
+
+    noCriado.folha = isFolha;
+    noCriado.nroChavesIndexadas = 0;
+    noCriado.RRNdoNo = RRndoNo;
+
+    for (int i = 0; i < ORDEM_ARVORE - 1; i++) {
+        noCriado.registros[i].P_ant = -1;
+        noCriado.registros[i].P_prox = -1;
+        noCriado.registros[i].C = -1;
+        noCriado.registros[i].Pr = -1;
+    }
+
+    return noCriado;
+}
+
 void salvaHeaderArvore(arvore* currArvore) {
     if (currArvore->arquivoIndice == NULL) printf("null");
     fseek(currArvore->arquivoIndice, 0, 0);
