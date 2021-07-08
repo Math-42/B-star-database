@@ -1,3 +1,5 @@
+#include "arvore.h"
+
 void imprimeHeader(arvore* currArvore) {
     printf("============== HEADER ==============\n");
     printf("status: %c\n", currArvore->header.status);
@@ -260,3 +262,24 @@ registro* buscaInsersaoRecursao(arvore* currArvore, arvoreNo* currNo, registro n
     }
 }
 
+void insereRegistro(arvore* currArvore, registro novoRegistro) {
+    if (currArvore->header.noRaiz == -1) {
+        currArvore->raiz = criarNovoNo('0', currArvore->header.RRNproxNo);
+        currArvore->header.noRaiz = currArvore->raiz.RRNdoNo;
+        salvaNoArvore(currArvore, &currArvore->raiz, currArvore->header.RRNproxNo);
+        currArvore->header.RRNproxNo++;
+    }
+
+    registro* registroEleitoParaRaiz = buscaInsersaoRecursao(currArvore, &currArvore->raiz, novoRegistro);
+
+    if (registroEleitoParaRaiz != NULL) {
+        currArvore->raiz = criarNovoNo('0', currArvore->header.RRNproxNo);  //cria uma nova raiz
+        currArvore->header.noRaiz = currArvore->raiz.RRNdoNo;
+        currArvore->header.RRNproxNo++;
+
+        insereNovoRegistro(currArvore, &currArvore->raiz, *registroEleitoParaRaiz);
+        free(registroEleitoParaRaiz);
+    }
+
+    imprimeNoRecursivo(currArvore, &currArvore->raiz, 0);
+}
