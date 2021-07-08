@@ -14,3 +14,11 @@ arvore* criaArvore(char nomeArquivoIndice[]) {
 
     return novaArvore;
 }
+
+void finalizaArvore(arvore* currArvore) {
+    currArvore->header.status = '1';
+    salvaHeaderArvore(currArvore);
+
+    fclose(currArvore->arquivoIndice);
+    free(currArvore);
+}
