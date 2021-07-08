@@ -95,6 +95,18 @@ void salvaNoArvore(arvore* currArvore, arvoreNo* novoNo, int RRN) {
     }
 }
 
+void insereRegistroOrdenado(registro registros[], registro novoRegistro, int tamanho) {
+    int i;
+
+    //percorre o vetor fazendo um shift em todos os registros posteriores a posição correta do novo registro
+    for (i = tamanho; i > 0 && novoRegistro.C < registros[i - 1].C; i--) {
+        registros[i] = registros[i - 1];
+    }
+
+    registros[i] = novoRegistro;
+    if (i + 1 < ORDEM_ARVORE) registros[i + 1].P_ant = novoRegistro.P_prox;
+}
+
 registro buscaBinariaRegistro(registro registros[], int chave, int tamanho) {
     int inicio = 0;
     int fim = tamanho - 1;
