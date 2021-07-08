@@ -91,9 +91,11 @@ int lerLinha_CSV(FILE* arquivoCSV, linha* novaLinha) {
  * de registro total e dos campos variaveis
  * @param arquivoBin nome do arquivo binário fonte dos dados
  * @param currL variavel para salvar os dados
+ * @param pos indica se deve ler o próximo registro (-1) ou algum em especifico
  * @return retorna 1 caso for o ultimo registro e 0 caso contrário
  */
-int lerLinha_Bin(FILE* arquivoBin, linha* currL) {
+int lerLinha_Bin(FILE* arquivoBin, linha* currL, long int pos) {
+    if (pos != -1) fseek(arquivoBin, pos, 0);
     lerStringBin(arquivoBin, &currL->removido, 1);
 
     currL->tamanhoRegistro = lerInteiroBin(arquivoBin);
@@ -277,7 +279,7 @@ void SelectFrom_Linha(char nomeArquivoBin[100]) {
     int isFinalDoArquivo = finalDoArquivo(arquivoBin);
 
     while (!isFinalDoArquivo) {
-        isFinalDoArquivo = lerLinha_Bin(arquivoBin, &novaLinha);
+        isFinalDoArquivo = lerLinha_Bin(arquivoBin, &novaLinha, -1);
         if (novaLinha.removido == '1') imprimeLinha(novaLinha, novoHeader);
     }
 
@@ -321,7 +323,7 @@ void SelectFromWhere_Linha(char nomeArquivoBin[100], char* campo, char* valor) {
                       // valores lido em cada registro do binario
 
     while (total--) {  // percorro todos registros de dados
-        lerLinha_Bin(arquivoBin, &linhaTemp);
+        lerLinha_Bin(arquivoBin, &linhaTemp, -1);
         int existe = 0;
         if (linhaTemp.removido == '0') continue;  // linha ja removida
 
@@ -413,15 +415,38 @@ void CreateIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArquivoBinInd
         novoRegistro.P_prox = -1;
         novoRegistro.Pr = ftell(arquivoBinRegistros);
 
-        isFinalDoArquivo = lerLinha_Bin(arquivoBinRegistros, &novaLinha);
+        isFinalDoArquivo = lerLinha_Bin(arquivoBinRegistros, &novaLinha, -1);
         novoRegistro.C = novaLinha.codLinha;
 
         if (novaLinha.removido == '1') insereRegistro(novaArvore, novoRegistro);
     }
 
-    imprimeArvore(novaArvore);
     fclose(arquivoBinRegistros);
     finalizaArvore(novaArvore);
     binarioNaTela(nomeArquivoBinIndex);
 }
 
+void SelectFromWithIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100], int valorBusca) {
+    FILE* arquivoBinRegistros;
+    if (!abrirArquivo(&arquivoBinRegistros, nomeArquivoBinRegistros, "rb", 1)) return;
+
+    linhaHeader novoHeader;
+    linha novaLinha;
+
+    lerHeaderBin_Linha(arquivoBinRegistros, &novoHeader);
+    if (!validaHeader_linha(&arquivoBinRegistros, novoHeader, 1, 1)) return;
+    arvore* novaArvore = carregaArvore(nomeArquivoBinIndex);
+
+    int isFinalDoArquivo = finalDoArquivo(arquivoBinRegistros);
+
+    int byteOffset = buscaRegistro(novaArvore, valorBusca);
+    if (byteOffset != -1) {
+        lerLinha_Bin(arquivoBinRegistros, &novaLinha, byteOffset);
+        imprimeLinha(novaLinha, novoHeader);
+    } else {
+        printf("Registro inexistente.");
+    }
+
+    fclose(arquivoBinRegistros);
+    finalizaArvore(novaArvore);
+}
