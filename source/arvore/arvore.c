@@ -41,3 +41,39 @@ void leHeaderArvore(FILE* arquivoIndice, arvoreHeader* header) {
     fread(&header->RRNproxNo, sizeof(int), 1, arquivoIndice);
     fread(&header->lixo, sizeof(char), 68, arquivoIndice);
 }
+
+void lerNoArvore(arvore* currArvore, arvoreNo* novoNo, int RRN) {
+    fseek(currArvore->arquivoIndice, (RRN + 1) * 77, 0);
+
+    fread(&novoNo->folha, sizeof(char), 1, currArvore->arquivoIndice);
+    fread(&novoNo->RRNdoNo, sizeof(int), 1, currArvore->arquivoIndice);
+    fread(&novoNo->nroChavesIndexadas, sizeof(int), 1, currArvore->arquivoIndice);
+
+    fread(&novoNo->registros[0].P_ant, sizeof(int), 1, currArvore->arquivoIndice);
+
+    for (int i = 0; i < ORDEM_ARVORE - 1; i++) {
+        fread(&novoNo->registros[i].C, sizeof(int), 1, currArvore->arquivoIndice);
+        fread(&novoNo->registros[i].Pr, sizeof(long int), 1, currArvore->arquivoIndice);
+        fread(&novoNo->registros[i].P_prox, sizeof(int), 1, currArvore->arquivoIndice);
+    }
+
+    for (int i = 0; i < ORDEM_ARVORE - 2; i++) {
+        novoNo->registros[i + 1].P_ant = novoNo->registros[i].P_prox;
+    }
+}
+
+void salvaNoArvore(arvore* currArvore, arvoreNo* novoNo, int RRN) {
+    fseek(currArvore->arquivoIndice, (RRN + 1) * 77, 0);
+
+    fwrite(&novoNo->folha, sizeof(char), 1, currArvore->arquivoIndice);
+    fwrite(&novoNo->RRNdoNo, sizeof(int), 1, currArvore->arquivoIndice);
+    fwrite(&novoNo->nroChavesIndexadas, sizeof(int), 1, currArvore->arquivoIndice);
+
+    fwrite(&novoNo->registros[0].P_ant, sizeof(int), 1, currArvore->arquivoIndice);
+
+    for (int i = 0; i < ORDEM_ARVORE - 1; i++) {
+        fwrite(&novoNo->registros[i].C, sizeof(int), 1, currArvore->arquivoIndice);
+        fwrite(&novoNo->registros[i].Pr, sizeof(long int), 1, currArvore->arquivoIndice);
+        fwrite(&novoNo->registros[i].P_prox, sizeof(int), 1, currArvore->arquivoIndice);
+    }
+}
