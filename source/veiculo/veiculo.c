@@ -4,10 +4,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../arvore/arvore.h"
 #include "../binario/binario.h"
 #include "../csv/csv.h"
 #include "../utils/utils.h"
-#include "../arvore/arvore.h"
 
 char MESES[][12] = {"janeiro", "fevereiro", "março", "abril",
                     "maio", "junho", "julho", "agosto",
@@ -410,25 +410,34 @@ void InsertInto_Veiculo(char nomeArquivoBin[100], int numeroDeEntradas) {
 }
 
 void CreateIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100]) {
+    FILE* arquivoBinRegistros;
+    if (!abrirArquivo(&arquivoBinRegistros, nomeArquivoBinRegistros, "rb", 1)) return;
 
-    arvore* novaArvore = criaArvore("teste123");
-    imprimeArvore(novaArvore);
+    veiculoHeader novoHeader;
+    veiculo novoVeiculo;
 
-    for(int i = 0; i < 15; i++) {
-        char a;
-        registro teste;
+    lerHeaderBin_Veiculo(arquivoBinRegistros, &novoHeader);
+    if (!validaHeader_veiculo(&arquivoBinRegistros, novoHeader, 1, 1)) return;
 
-        scanf(" %c",&a);
-        teste.P_ant  = -1;
-        teste.P_prox = -1;
-        teste.C      = a;
-        teste.Pr     = a+'0';
+    arvore* novaArvore = criaArvore(nomeArquivoBinIndex);
 
-        insereRegistro(novaArvore, teste);
-        
+    int isFinalDoArquivo = finalDoArquivo(arquivoBinRegistros);
+    //percorre todo o arquivo salvando apenas os registros salvos
+
+    while (!isFinalDoArquivo) {
+        registro novoRegistro;
+
+        novoRegistro.P_ant = -1;
+        novoRegistro.P_prox = -1;
+        novoRegistro.Pr = ftell(arquivoBinRegistros);
+
+        isFinalDoArquivo = lerVeiculo_Bin(arquivoBinRegistros, &novoVeiculo);
+        novoRegistro.C = convertePrefixo(novoVeiculo.prefixo);
+
+        if (novoVeiculo.removido == '1') insereRegistro(novaArvore, novoRegistro);
     }
 
-    imprimeArvore(novaArvore);
+    fclose(arquivoBinRegistros);
     finalizaArvore(novaArvore);
-
+    binarioNaTela(nomeArquivoBinIndex);
 }

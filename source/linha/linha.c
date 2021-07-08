@@ -391,3 +391,37 @@ void InsertInto_Linha(char nomeArquivoBin[100], int numeroDeEntradas) {
     fclose(arquivoBin);
     binarioNaTela(nomeArquivoBin);
 }
+
+void CreateIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100]) {
+    FILE* arquivoBinRegistros;
+    if (!abrirArquivo(&arquivoBinRegistros, nomeArquivoBinRegistros, "rb", 1)) return;
+
+    linhaHeader novoHeader;
+    linha novaLinha;
+
+    lerHeaderBin_Linha(arquivoBinRegistros, &novoHeader);
+    if (!validaHeader_linha(&arquivoBinRegistros, novoHeader, 1, 1)) return;
+
+    arvore* novaArvore = criaArvore(nomeArquivoBinIndex);
+
+    int isFinalDoArquivo = finalDoArquivo(arquivoBinRegistros);
+    //percorre todo o arquivo salvando apenas os registros salvos
+    while (!isFinalDoArquivo) {
+        registro novoRegistro;
+
+        novoRegistro.P_ant = -1;
+        novoRegistro.P_prox = -1;
+        novoRegistro.Pr = ftell(arquivoBinRegistros);
+
+        isFinalDoArquivo = lerLinha_Bin(arquivoBinRegistros, &novaLinha);
+        novoRegistro.C = novaLinha.codLinha;
+
+        if (novaLinha.removido == '1') insereRegistro(novaArvore, novoRegistro);
+    }
+
+    imprimeArvore(novaArvore);
+    fclose(arquivoBinRegistros);
+    finalizaArvore(novaArvore);
+    binarioNaTela(nomeArquivoBinIndex);
+}
+
