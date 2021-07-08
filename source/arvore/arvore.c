@@ -94,3 +94,21 @@ void salvaNoArvore(arvore* currArvore, arvoreNo* novoNo, int RRN) {
         fwrite(&novoNo->registros[i].P_prox, sizeof(int), 1, currArvore->arquivoIndice);
     }
 }
+
+registro buscaBinariaRegistro(registro registros[], int chave, int tamanho) {
+    int inicio = 0;
+    int fim = tamanho - 1;
+    int indice;
+
+    while (inicio <= fim) {
+        indice = (inicio + fim) / 2;
+        if (registros[indice].C == chave)
+            break;
+        else if (registros[indice].C > chave)
+            fim = indice - 1;
+        else
+            inicio = indice + 1;
+    }
+
+    return registros[indice];
+}
