@@ -20,11 +20,12 @@ void menu() {
     int funcionalidade, numeroDeEntradas;
     char nomeArquivoCSV[100];
     char nomeArquivoBin[100];
+    char nomeArquivoBinIndice[100];
     char nomeDoCampoBuscado[100];
     char valorBuscado[100];
 
-    scanf("%d", &funcionalidade);//le o modo que o programa deve operar
-
+    //scanf("%d", &funcionalidade);//le o modo que o programa deve operar
+    funcionalidade = 9;
     switch (funcionalidade) {
         case 1:
             scanf("%s %s", nomeArquivoCSV, nomeArquivoBin);
@@ -70,6 +71,12 @@ void menu() {
             scanf("%s", nomeArquivoBin);
             scanf("%d", &numeroDeEntradas);
             InsertInto_Linha(nomeArquivoBin, 4);
+            return;
+            break;
+        case 9:
+            //scanf("%s", nomeArquivoBin);
+            //scanf("%s", nomeArquivoBinIndice);
+            CreateIndex_Veiculo("aasd", "asd");
             return;
             break;
         default:

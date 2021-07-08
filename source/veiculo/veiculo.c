@@ -409,3 +409,26 @@ void InsertInto_Veiculo(char nomeArquivoBin[100], int numeroDeEntradas) {
     binarioNaTela(nomeArquivoBin);
 }
 
+void CreateIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100]) {
+
+    arvore* novaArvore = criaArvore("teste123");
+    imprimeArvore(novaArvore);
+
+    for(int i = 0; i < 15; i++) {
+        char a;
+        registro teste;
+
+        scanf(" %c",&a);
+        teste.P_ant  = -1;
+        teste.P_prox = -1;
+        teste.C      = a;
+        teste.Pr     = a+'0';
+
+        insereRegistro(novaArvore, teste);
+        
+    }
+
+    imprimeArvore(novaArvore);
+    finalizaArvore(novaArvore);
+
+}
