@@ -71,6 +71,11 @@ void imprimeArvore(arvore* currArvore) {
     imprimeNoRecursivo(currArvore, &currArvore->raiz, 0);
 }
 
+/**
+ * Aloca uma struct do tipo arvore e inicializa seus valores
+ * @param nomeArquivoIndice nome do arquivo onde os indices serão salvos
+ * @return ponteiro para a struct do tipo arvore
+ */
 arvore* criaArvore(char nomeArquivoIndice[]) {
     arvore* novaArvore = (arvore*)malloc(sizeof(arvore));
 
@@ -86,6 +91,11 @@ arvore* criaArvore(char nomeArquivoIndice[]) {
     return novaArvore;
 }
 
+/**
+ * Libera a struct alocada, salva as modificações e fecha o arquivo
+ * @param currArvore arvore a ser liberada
+ * 
+ */
 void finalizaArvore(arvore* currArvore) {
     currArvore->header.status = '1';
     salvaHeaderArvore(currArvore);
@@ -94,6 +104,12 @@ void finalizaArvore(arvore* currArvore) {
     free(currArvore);
 }
 
+/**
+ * Cria um novo nó de arbore b
+ * @param isFolha define se o nó criado será folha ou não
+ * @param RRndoNo RRN do nó que será criado
+ * @return nó criado e inicializado
+ */
 arvoreNo criarNovoNo(char isFolha, int RRndoNo) {
     arvoreNo noCriado;
 
@@ -111,6 +127,10 @@ arvoreNo criarNovoNo(char isFolha, int RRndoNo) {
     return noCriado;
 }
 
+/**
+ * Salva o header da árvore no seu respectivo arquivo
+ * @param currArvore arvore que terá seu header salvo
+ */
 void salvaHeaderArvore(arvore* currArvore) {
     fseek(currArvore->arquivoIndice, 0, 0);
 
@@ -120,6 +140,11 @@ void salvaHeaderArvore(arvore* currArvore) {
     fwrite(&currArvore->header.lixo, sizeof(char), 68, currArvore->arquivoIndice);
 }
 
+/**
+ * Le o header de uma arvore a partir de um arquivo
+ * @param arquivoIndice arquivo de onde o header será lido
+ * @param header variável onde o header será salvo
+ */
 void leHeaderArvore(FILE* arquivoIndice, arvoreHeader* header) {
     fseek(arquivoIndice, 0, 0);
 
@@ -129,6 +154,11 @@ void leHeaderArvore(FILE* arquivoIndice, arvoreHeader* header) {
     fread(&header->lixo, sizeof(char), 68, arquivoIndice);
 }
 
+/**
+ * Aloca uma struct do tipo arvore e inicializa seus valores a partir de um arquivo já existente
+ * @param nomeArquivoIndice nome do arquivo de onde os dados serão carregados
+ * @return ponteiro para a struct do tipo arvore
+ */
 arvore* carregaArvore(char nomeArquivoIndice[]) {
     arvore* novaArvore = (arvore*)malloc(sizeof(arvore));
 
@@ -141,6 +171,12 @@ arvore* carregaArvore(char nomeArquivoIndice[]) {
     return novaArvore;
 }
 
+/**
+ * Lê um nó especifico de uma arvore
+ * @param currArvore arvore de onde o nó será lido
+ * @param novoNo variável onde o nó lido será salvo
+ * @param RRN RRN do nó a ser lido
+ */
 void lerNoArvore(arvore* currArvore, arvoreNo* novoNo, int RRN) {
     fseek(currArvore->arquivoIndice, (RRN + 1) * 77, 0);
 
@@ -161,6 +197,12 @@ void lerNoArvore(arvore* currArvore, arvoreNo* novoNo, int RRN) {
     }
 }
 
+/**
+ * Salva um nó especifico de uma arvore
+ * @param currArvore arvore de onde o nó será salvo
+ * @param novoNo nó que será salvo
+ * @param RRN RRN que indica onde o nó será salvo
+ */
 void salvaNoArvore(arvore* currArvore, arvoreNo* novoNo, int RRN) {
     fseek(currArvore->arquivoIndice, (RRN + 1) * 77, 0);
 
@@ -177,6 +219,12 @@ void salvaNoArvore(arvore* currArvore, arvoreNo* novoNo, int RRN) {
     }
 }
 
+/**
+ * Insere um registro um um array de registros de forma ordenada e corrigindo seus ponteiros
+ * @param registros array de registros
+ * @param novoRegistro registro que será inserido
+ * @param tamanho tamanho do array (0,N-1)
+ */
 void insereRegistroOrdenado(registro registros[], registro novoRegistro, int tamanho) {
     int i;
 
@@ -189,6 +237,13 @@ void insereRegistroOrdenado(registro registros[], registro novoRegistro, int tam
     if (i + 1 < ORDEM_ARVORE) registros[i + 1].P_ant = novoRegistro.P_prox;
 }
 
+/**
+ * Busca um registro em um array de forma binária
+ * @param registros array de registros
+ * @param chave chave buscada
+ * @param tamanho tamanho do array (0,N-1)
+ * @return retorna o registro ou, caso não exista, o registro mais próximo do requisitado
+ */
 registro buscaBinariaRegistro(registro registros[], int chave, int tamanho) {
     int inicio = 0;
     int fim = tamanho - 1;
@@ -207,6 +262,13 @@ registro buscaBinariaRegistro(registro registros[], int chave, int tamanho) {
     return registros[indice];
 }
 
+/**
+ * Divide um nó em dois e elege um registro
+ * @param currArvore arvore que contem o nó
+ * @param currNo nó que será dividido
+ * @param novoRegistro registro que está sendo inserido durante a divisão
+ * @return ponteiro para o registro que foi eleito
+ */
 registro* splitNo(arvore* currArvore, arvoreNo* currNo, registro novoRegistro) {
     registro* registroEleito = (registro*)malloc(sizeof(registro));
 
@@ -247,6 +309,13 @@ registro* splitNo(arvore* currArvore, arvoreNo* currNo, registro novoRegistro) {
     return registroEleito;
 }
 
+/**
+ * Insere um novo registro no nó, caso possivel, e, se não, faz um "split"
+ * @param currArvore arvore que contem o nó que receberá o novo registro
+ * @param currNo nó onde o registro será inserido (ou que será dividido)
+ * @param novoRegistro registro que será inserido
+ * @return ponteiro para o registro que foi eleito ou NULL caso nenhum seja eleito
+ */
 registro* insereNovoRegistro(arvore* currArvore, arvoreNo* currNo, registro novoRegistro) {
     if (currNo->nroChavesIndexadas < ORDEM_ARVORE - 1) {
         insereRegistroOrdenado(currNo->registros, novoRegistro, currNo->nroChavesIndexadas);
@@ -258,18 +327,27 @@ registro* insereNovoRegistro(arvore* currArvore, arvoreNo* currNo, registro novo
     }
 }
 
+/**
+ * Busca recursivamente o local onde o novo registro deve ser inserido
+ * @param currArvore arvore que contem o nó que receberá o novo registro
+ * @param currNo nó atual da busca
+ * @param novoRegistro registro que será inserido
+ * @return ponteiro para o registro que foi eleito ou NULL caso nenhum seja eleito
+ */
 registro* buscaInsersaoRecursao(arvore* currArvore, arvoreNo* currNo, registro novoRegistro) {
-    if (currNo->folha == '1' || currArvore->header.noRaiz == 0) {
+    if (currNo->folha == '1' || currArvore->header.noRaiz == 0) {//testa se é folha ou se raiz = folha
         return insereNovoRegistro(currArvore, currNo, novoRegistro);
     }
 
-    arvoreNo proxNo;
+    //busca  o próximo nó por onde se deve continuar a busca
     registro registroPai = buscaBinariaRegistro(currNo->registros, novoRegistro.C, currNo->nroChavesIndexadas);
+    arvoreNo proxNo;
     int RRNproxReg = registroPai.C > novoRegistro.C ? registroPai.P_ant : registroPai.P_prox;
     lerNoArvore(currArvore, &proxNo, RRNproxReg);
 
     registro* registroEleito = buscaInsersaoRecursao(currArvore, &proxNo, novoRegistro);
 
+    //testa se algum registro foi eleito no processo
     if (registroEleito != NULL) {
         registro* novoRegistroEleito = insereNovoRegistro(currArvore, currNo, *registroEleito);
         free(registroEleito);
@@ -277,16 +355,23 @@ registro* buscaInsersaoRecursao(arvore* currArvore, arvoreNo* currNo, registro n
     }
 }
 
+/**
+ * Insere um novo registro na árvore
+ * @param currArvore arvore que contem o nó que receberá o novo registro
+ * @param novoRegistro registro que será inserido
+ */
 void insereRegistro(arvore* currArvore, registro novoRegistro) {
-    if (currArvore->header.noRaiz == -1) {
+    if (currArvore->header.noRaiz == -1) {// testa se já existe uma raiz, caso não exista ela será criada
         currArvore->raiz = criarNovoNo('0', currArvore->header.RRNproxNo);
         currArvore->header.noRaiz = currArvore->raiz.RRNdoNo;
         salvaNoArvore(currArvore, &currArvore->raiz, currArvore->header.RRNproxNo);
         currArvore->header.RRNproxNo++;
     }
 
+
     registro* registroEleitoParaRaiz = buscaInsersaoRecursao(currArvore, &currArvore->raiz, novoRegistro);
 
+    //testa se um registro foi eleito, nesse caso a raiz deve ser atualizada
     if (registroEleitoParaRaiz != NULL) {
         currArvore->raiz = criarNovoNo('0', currArvore->header.RRNproxNo);  //cria uma nova raiz
         currArvore->header.noRaiz = currArvore->raiz.RRNdoNo;
@@ -297,21 +382,36 @@ void insereRegistro(arvore* currArvore, registro novoRegistro) {
     }
 }
 
+/**
+ * Busca recursivamente um registro com base na chave passada
+ * @param currArvore arvore onde a busca ocorrerá
+ * @param currNo nó atual da busca
+ * @param chaveRegistro chave da busca
+ * @return byteOffset do registro no arquivo original ou -1 caso não encontre
+ */
 long int buscaRegistroRecursao(arvore* currArvore, arvoreNo* currNo, int chaveRegistro) {
+    //procura o registro
     registro registroPai = buscaBinariaRegistro(currNo->registros, chaveRegistro, currNo->nroChavesIndexadas);
     if (registroPai.C == chaveRegistro) return registroPai.Pr;
 
+    //se nãso achou decide o próximo nó
     int RRNproxReg = registroPai.C > chaveRegistro ? registroPai.P_ant : registroPai.P_prox;
 
-    if (RRNproxReg == -1) {
+    if (RRNproxReg == -1) {//testa se existe o próximo nó
         return -1;
-    } else {
+    } else {//continua a busca
         arvoreNo proxNo;
         lerNoArvore(currArvore, &proxNo, RRNproxReg);
         return buscaRegistroRecursao(currArvore, &proxNo, chaveRegistro);
     }
 }
 
+/**
+ * Busca um registro com base na chave passada
+ * @param currArvore arvore onde a busca ocorrerá
+ * @param chaveRegistro chave da busca
+ * @return byteOffset do registro no arquivo original ou -1 caso não encontre
+ */
 long int buscaRegistro(arvore* currArvore, int chave) {
     if (currArvore->header.noRaiz == -1) {
         return -1;
