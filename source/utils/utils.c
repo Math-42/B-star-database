@@ -1,9 +1,9 @@
 #include "utils.h"
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /**
  * Abre um arquivo e testa se ele já existe ou não
@@ -13,10 +13,10 @@
  * @param verificaExistencia flag que indica se deve ou não testar a existencia, 0 para falso, 1 ou mais para verdade
  * @return retorna 1 caso o arquivo exista (ou caso não for exigida a verificação) e 0 caso não exista
  */
-int abrirArquivo(FILE** arquivo,char* nomeDoArquivo, char* tipoDeAbertura, int verificaExistencia){
+int abrirArquivo(FILE** arquivo, char* nomeDoArquivo, char* tipoDeAbertura, int verificaExistencia) {
     int existe = 1;
     *arquivo = fopen(nomeDoArquivo, tipoDeAbertura);
-    if(verificaExistencia>0 && *arquivo==NULL){
+    if (verificaExistencia > 0 && *arquivo == NULL) {
         existe = 0;
         printf("Falha no processamento do arquivo.");
     }
@@ -29,12 +29,12 @@ int abrirArquivo(FILE** arquivo,char* nomeDoArquivo, char* tipoDeAbertura, int v
  * @param tamanho quantidade de digitos do número
  * @return inteiro convertido
  */
-int stringToInt(char string[11], int tamanho){
-	int valorLido = 0;
-	for (int i = 0; i < tamanho; i++) {//percorre cada digito transformando em int
+int stringToInt(char string[11], int tamanho) {
+    int valorLido = 0;
+    for (int i = 0; i < tamanho; i++) {  //percorre cada digito transformando em int
         valorLido = valorLido * 10 + (string[i] - '0');
     }
-	return valorLido;
+    return valorLido;
 }
 
 /**
@@ -43,11 +43,11 @@ int stringToInt(char string[11], int tamanho){
  * @param arquivo arquivo a ser lido
  * @return retorna 1 caso seja o final e 0 caso não seja
  */
-int finalDoArquivo(FILE* arquivo){
+int finalDoArquivo(FILE* arquivo) {
     int isFinal = 0;
     char finalByte;
-    isFinal = (fread(&finalByte,sizeof(char),1,arquivo)==0)? 1:0;
-    if(!isFinal) fseek(arquivo,-1,SEEK_CUR);//volta 1 byte caso não esteja no final
+    isFinal = (fread(&finalByte, sizeof(char), 1, arquivo) == 0) ? 1 : 0;
+    if (!isFinal) fseek(arquivo, -1, SEEK_CUR);  //volta 1 byte caso não esteja no final
     return isFinal;
 }
 
@@ -64,11 +64,11 @@ char* ajustaString(char* string) {
  * Imprime um inteiro ou campo com valor nulo caso ele seja -1
  * @param inteiro inteiro a ser analisada
  */
-void imprimeInteiro(int inteiro){
-    if(inteiro == -1){
+void imprimeInteiro(int inteiro) {
+    if (inteiro == -1) {
         printf("campo com valor nulo\n");
     } else {
-        printf("%d\n",inteiro);
+        printf("%d\n", inteiro);
     }
 }
 
@@ -79,14 +79,14 @@ void imprimeInteiro(int inteiro){
  * @param isInt determina se o valor a ser impresso é inteiro ou string, sendo > 0 para
  * @return retorna a própria string ou uma string padrão caso seja nula
  */
-void imprimirCampo(char* descricao, void* valor, int isInt){
-    if(isInt >0){//testa se o valor recebido é inteiro ou não
-        int* valorInteiro =  (int*)valor;
-        printf("%s: ",descricao);
+void imprimirCampo(char* descricao, void* valor, int isInt) {
+    if (isInt > 0) {  //testa se o valor recebido é inteiro ou não
+        int* valorInteiro = (int*)valor;
+        printf("%s: ", descricao);
         imprimeInteiro(*valorInteiro);
     } else {
-        char* valorString =  (char*)valor;
-        printf("%s: %s\n",descricao,ajustaString(valorString));
+        char* valorString = (char*)valor;
+        printf("%s: %s\n", descricao, ajustaString(valorString));
     }
 }
 
@@ -95,7 +95,7 @@ void imprimirCampo(char* descricao, void* valor, int isInt){
  * @param string string onde o dado será salvo
  * @return retorna o tamanho da string lida
  */
-int lerStringTerminal(char string[100]){
+int lerStringTerminal(char string[100]) {
     scan_quote_string(string);
     int tamanho = (int)strlen(string);
     string[tamanho] = '\0';
@@ -108,44 +108,43 @@ int lerStringTerminal(char string[100]){
  * @param tamanhoMaximo tamanho máximo aceito
  * @return retorna o tamanho real da string lida
  */
-int lerStringTerminalFixa(char* string,int tamanhoMaximo) {
+int lerStringTerminalFixa(char* string, int tamanhoMaximo) {
     int tamanhoReal = lerStringTerminal(string);
-    for(int i=tamanhoReal+1;i<tamanhoMaximo;i++)string[i]= '@';//completa de @ após o \0 caso necessário
+    for (int i = tamanhoReal + 1; i < tamanhoMaximo; i++) string[i] = '@';  //completa de @ após o \0 caso necessário
     return tamanhoReal;
 }
 
 // FUNCOES FORNECIDAS PELOS MONITORES
-void binarioNaTela(char *nomeArquivoBinario) { /* Você não precisa entender o código dessa função. */
+void binarioNaTela(char* nomeArquivoBinario) { /* Você não precisa entender o código dessa função. */
 
-	/* Use essa função para comparação no run.codes. Lembre-se de ter fechado (fclose) o arquivo anteriormente.
+    /* Use essa função para comparação no run.codes. Lembre-se de ter fechado (fclose) o arquivo anteriormente.
 	*  Ela vai abrir de novo para leitura e depois fechar (você não vai perder pontos por isso se usar ela). */
 
-	unsigned long i, cs;
-	unsigned char *mb;
-	size_t fl;
-	FILE *fs;
-	if(nomeArquivoBinario == NULL || !(fs = fopen(nomeArquivoBinario, "rb"))) {
-		fprintf(stderr, "ERRO AO ESCREVER O BINARIO NA TELA (função binarioNaTela): não foi possível abrir o arquivo que me passou para leitura. Ele existe e você tá passando o nome certo? Você lembrou de fechar ele com fclose depois de usar?\n");
-		return;
-	}
-	fseek(fs, 0, SEEK_END);
-	fl = ftell(fs);
-	fseek(fs, 0, SEEK_SET);
-	mb = (unsigned char *) malloc(fl);
-	fread(mb, 1, fl, fs);
+    unsigned long i, cs;
+    unsigned char* mb;
+    size_t fl;
+    FILE* fs;
+    if (nomeArquivoBinario == NULL || !(fs = fopen(nomeArquivoBinario, "rb"))) {
+        fprintf(stderr, "ERRO AO ESCREVER O BINARIO NA TELA (função binarioNaTela): não foi possível abrir o arquivo que me passou para leitura. Ele existe e você tá passando o nome certo? Você lembrou de fechar ele com fclose depois de usar?\n");
+        return;
+    }
+    fseek(fs, 0, SEEK_END);
+    fl = ftell(fs);
+    fseek(fs, 0, SEEK_SET);
+    mb = (unsigned char*)malloc(fl);
+    fread(mb, 1, fl, fs);
 
-	cs = 0;
-	for(i = 0; i < fl; i++) {
-		cs += (unsigned long) mb[i];
-	}
-	printf("%lf\n", (cs / (double) 100));
-	free(mb);
-	fclose(fs);
+    cs = 0;
+    for (i = 0; i < fl; i++) {
+        cs += (unsigned long)mb[i];
+    }
+    printf("%lf\n", (cs / (double)100));
+    free(mb);
+    fclose(fs);
 }
 
-void scan_quote_string(char *str) {
-
-	/*
+void scan_quote_string(char* str) {
+    /*
 	*	Use essa função para ler um campo string delimitado entre aspas (").
 	*	Chame ela na hora que for ler tal campo. Por exemplo:
 	*
@@ -158,24 +157,25 @@ void scan_quote_string(char *str) {
 	*
 	*/
 
-	char R;
+    char R;
 
-	while((R = getchar()) != EOF && isspace(R)); // ignorar espaços, \r, \n...
+    while ((R = getchar()) != EOF && isspace(R))
+        ;  // ignorar espaços, \r, \n...
 
-	if(R == 'N' || R == 'n') { // campo NULO
-		getchar(); getchar(); getchar(); // ignorar o "ULO" de NULO.
-		strcpy(str, ""); // copia string vazia
-	} else if(R == '\"') {
-		if(scanf("%[^\"]", str) != 1) { // ler até o fechamento das aspas
-			strcpy(str, "");
-		}
-		getchar(); // ignorar aspas fechando
-	} else if(R != EOF){ // vc tá tentando ler uma string que não tá entre aspas! Fazer leitura normal %s então, pois deve ser algum inteiro ou algo assim...
-		str[0] = R;
-		scanf("%s", &str[1]);
-	} else { // EOF
-		strcpy(str, "");
-	}
+    if (R == 'N' || R == 'n') {  // campo NULO
+        getchar();
+        getchar();
+        getchar();        // ignorar o "ULO" de NULO.
+        strcpy(str, "");  // copia string vazia
+    } else if (R == '\"') {
+        if (scanf("%[^\"]", str) != 1) {  // ler até o fechamento das aspas
+            strcpy(str, "");
+        }
+        getchar();          // ignorar aspas fechando
+    } else if (R != EOF) {  // vc tá tentando ler uma string que não tá entre aspas! Fazer leitura normal %s então, pois deve ser algum inteiro ou algo assim...
+        str[0] = R;
+        scanf("%s", &str[1]);
+    } else {  // EOF
+        strcpy(str, "");
+    }
 }
-
-

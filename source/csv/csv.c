@@ -1,5 +1,7 @@
 #include "csv.h"
+
 #include <stdio.h>
+
 #include "../utils/utils.h"
 
 /**
@@ -8,14 +10,14 @@
  * @param string string onde o conteúdo será salvo
  * @return tamanho do campo lido
  */
-int lerByteAByte(FILE* arquivo, char* string){
-	int posicao = -1;
-    
-	do {
+int lerByteAByte(FILE* arquivo, char* string) {
+    int posicao = -1;
+
+    do {
         posicao++;
         fread(&string[posicao], sizeof(char), 1, arquivo);
     } while (string[posicao] != '\n' && string[posicao] != ',');
-    
+
     return posicao;
 }
 
@@ -39,8 +41,8 @@ int validarValorLido(char string[11]) {
  * @return retorna o tamanho da string lida
  */
 int lerString(FILE* arquivo, char* string) {
-	int tamanho = lerByteAByte(arquivo,string);
-    if(!validarValorLido(string))tamanho=0;
+    int tamanho = lerByteAByte(arquivo, string);
+    if (!validarValorLido(string)) tamanho = 0;
     string[tamanho] = '\0';
     return tamanho;
 }
@@ -52,9 +54,9 @@ int lerString(FILE* arquivo, char* string) {
  * @param tamanhoMaximo tamanho máximo aceito
  * @return retorna o tamanho real da string lida
  */
-int lerStringFixa(FILE* arquivo, char* string,int tamanhoMaximo) {
-    int tamanhoReal = lerString(arquivo,string);
-    for(int i=tamanhoReal+1;i<tamanhoMaximo;i++)string[i]= '@';//completa de @ após o \0 caso necessário
+int lerStringFixa(FILE* arquivo, char* string, int tamanhoMaximo) {
+    int tamanhoReal = lerString(arquivo, string);
+    for (int i = tamanhoReal + 1; i < tamanhoMaximo; i++) string[i] = '@';  //completa de @ após o \0 caso necessário
     return tamanhoReal;
 }
 
@@ -63,11 +65,11 @@ int lerStringFixa(FILE* arquivo, char* string,int tamanhoMaximo) {
  * @param arquivo arquivo a ser analisado
  * @return retorna '0' para removido e '1' para não removido
  */
-char foiRemovido(FILE* arquivo){
+char foiRemovido(FILE* arquivo) {
     char primeiroChar;
     fread(&primeiroChar, sizeof(char), 1, arquivo);
-    primeiroChar = (primeiroChar == '*')? '0':'1';
-    if(primeiroChar == '1')fseek(arquivo,-1,SEEK_CUR);
+    primeiroChar = (primeiroChar == '*') ? '0' : '1';
+    if (primeiroChar == '1') fseek(arquivo, -1, SEEK_CUR);
     return primeiroChar;
 }
 
@@ -79,9 +81,9 @@ char foiRemovido(FILE* arquivo){
 int lerInteiro(FILE* arquivo) {
     char string[11];  // tamanho do maior inteiro possivel
 
-	int tamanho = lerByteAByte(arquivo,string);
+    int tamanho = lerByteAByte(arquivo, string);
 
     if (validarValorLido(string) == 0) return -1;
 
-    return stringToInt(string,tamanho);
+    return stringToInt(string, tamanho);
 }

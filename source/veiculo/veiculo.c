@@ -278,21 +278,20 @@ void CreateTable_Veiculo(char nomeArquivoCSV[100], char nomeArquivoBin[100]) {
  * @param nomeArquivoBIn nome do arquivo binário de onde os dados serão lidos
  */
 void SelectFrom_Veiculo(char nomeArquivoBin[100]) {
-
     FILE* arquivoBin;
-    if(!abrirArquivo(&arquivoBin,nomeArquivoBin,"rb",1))return;
+    if (!abrirArquivo(&arquivoBin, nomeArquivoBin, "rb", 1)) return;
 
     veiculoHeader novoHeader;
     veiculo novoVeiculo;
 
     lerHeaderBin_Veiculo(arquivoBin, &novoHeader);
-    if(!validaHeader_veiculo(&arquivoBin,novoHeader,1,1))return;
+    if (!validaHeader_veiculo(&arquivoBin, novoHeader, 1, 1)) return;
 
     int isFinalDoArquivo = finalDoArquivo(arquivoBin);
     //percorre todo o arquivo imprimindo apenas os registros salvos
     while (!isFinalDoArquivo) {
         isFinalDoArquivo = lerVeiculo_Bin(arquivoBin, &novoVeiculo);
-        if (novoVeiculo.removido == '1') imprimeVeiculo(novoVeiculo,novoHeader);
+        if (novoVeiculo.removido == '1') imprimeVeiculo(novoVeiculo, novoHeader);
     }
 
     fclose(arquivoBin);
@@ -309,26 +308,31 @@ void SelectFrom_Veiculo(char nomeArquivoBin[100]) {
  */
 void SelectFromWhere_Veiculo(char nomeArquivoBin[100], char* campo, char* valor) {
     FILE* arquivoBin;
-    if(!abrirArquivo(&arquivoBin,nomeArquivoBin,"rb",1))return;
+    if (!abrirArquivo(&arquivoBin, nomeArquivoBin, "rb", 1)) return;
 
     veiculoHeader header;
 
     lerHeaderBin_Veiculo(arquivoBin, &header);
-    if(!validaHeader_veiculo(&arquivoBin,header,1,1))return;    
+    if (!validaHeader_veiculo(&arquivoBin, header, 1, 1)) return;
 
-    int headerPos;                      // posição do campo no cabeçalho
-    if (strcmp(campo, "prefixo") == 0)  headerPos = 0;  // prefixo (string)
-    else if (strcmp(campo, "data") == 0)  headerPos = 1;  // data (string)
-    else if (strcmp(campo, "quantidadeLugares") == 0) headerPos = 2;  // qt_lugares (int)
-    else if (strcmp(campo, "codLinha") == 0) headerPos = 3; // cod_linha (int)
-    else if (strcmp(campo, "modelo") == 0) headerPos = 4;  // modelo (string)
-    else if (strcmp(campo, "categoria") == 0) headerPos = 5;  // categoria (string)
-        
+    int headerPos;  // posição do campo no cabeçalho
+    if (strcmp(campo, "prefixo") == 0)
+        headerPos = 0;  // prefixo (string)
+    else if (strcmp(campo, "data") == 0)
+        headerPos = 1;  // data (string)
+    else if (strcmp(campo, "quantidadeLugares") == 0)
+        headerPos = 2;  // qt_lugares (int)
+    else if (strcmp(campo, "codLinha") == 0)
+        headerPos = 3;  // cod_linha (int)
+    else if (strcmp(campo, "modelo") == 0)
+        headerPos = 4;  // modelo (string)
+    else if (strcmp(campo, "categoria") == 0)
+        headerPos = 5;  // categoria (string)
 
     int total = header.nroRegistros + header.nroRegRemovidos;  // numero total de registros de dados
     int existePeloMenosUm = 0;
 
-    fseek(arquivoBin, 175,0);  // posiciono para o primeiro registro de dados do binario
+    fseek(arquivoBin, 175, 0);  // posiciono para o primeiro registro de dados do binario
 
     veiculo veiculoTemp;  // crio a cada iteração um veiculo atribuindo a ele os
                           // valores lido em cada registro do binario
@@ -341,13 +345,13 @@ void SelectFromWhere_Veiculo(char nomeArquivoBin[100], char* campo, char* valor)
         switch (headerPos) {
             case 0:
                 if (strcmp(valor, veiculoTemp.prefixo) == 0) {
-                    imprimeVeiculo(veiculoTemp,header);
+                    imprimeVeiculo(veiculoTemp, header);
                     fclose(arquivoBin);
-                    return;  
+                    return;
                     //como o prefixo é unico pode interromper assim que encontrar o primeiro
                 }
                 break;
-            case 1: 
+            case 1:
                 if (strcmp(valor, veiculoTemp.data) == 0) existe = 1;
                 break;
             case 2:
@@ -366,13 +370,13 @@ void SelectFromWhere_Veiculo(char nomeArquivoBin[100], char* campo, char* valor)
                 break;
         }
 
-        if (existe) { // dado encontrado 
-            imprimeVeiculo(veiculoTemp,header);
+        if (existe) {  // dado encontrado
+            imprimeVeiculo(veiculoTemp, header);
             existePeloMenosUm = 1;
         }
     }
 
-    if (!existePeloMenosUm)printf("Registro inexistente.\n");  // nenhum registro encontrado
+    if (!existePeloMenosUm) printf("Registro inexistente.\n");  // nenhum registro encontrado
 
     fclose(arquivoBin);
 }
@@ -385,24 +389,20 @@ void SelectFromWhere_Veiculo(char nomeArquivoBin[100], char* campo, char* valor)
  */
 void InsertInto_Veiculo(char nomeArquivoBin[100], int numeroDeEntradas) {
     FILE* arquivoBin;
-    if(!abrirArquivo(&arquivoBin,nomeArquivoBin,"rb+",1))return;
+    if (!abrirArquivo(&arquivoBin, nomeArquivoBin, "rb+", 1)) return;
 
     veiculo novoVeiculo;
     veiculoHeader header;
-    
+
     lerHeaderBin_Veiculo(arquivoBin, &header);
-    if(!validaHeader_veiculo(&arquivoBin,header,1,0))return;
+    if (!validaHeader_veiculo(&arquivoBin, header, 1, 0)) return;
 
     header.status = '0';
     salvaHeader_Veiculo(arquivoBin, &header);
 
-    printf("Numero de entradas: %d \n", numeroDeEntradas);
-    while (numeroDeEntradas--){    
-        printf("Numero de entradas: %d \n", numeroDeEntradas);
-        
+    while (numeroDeEntradas--) {
         lerVeiculo_Terminal(&novoVeiculo);
-        imprimeVeiculo(novoVeiculo,header);
-        salvaVeiculo(arquivoBin, &novoVeiculo,&header);  // salvo o novo veículo no fim do binário
+        salvaVeiculo(arquivoBin, &novoVeiculo, &header);  // salvo o novo veículo no fim do binário
     }
 
     header.status = '1';

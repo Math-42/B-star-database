@@ -1,4 +1,5 @@
 #include "binario.h"
+
 #include <stdio.h>
 
 /**
@@ -8,9 +9,9 @@
  * @param tamanho tamanho da string a ser lida
  * @return retorna o tamanho da string
  */
-int lerStringBin(FILE* arquivo, char* string,int tamanho) {
-	fread(string,sizeof(char),tamanho,arquivo);
-	string[tamanho] = '\0';
+int lerStringBin(FILE* arquivo, char* string, int tamanho) {
+    fread(string, sizeof(char), tamanho, arquivo);
+    string[tamanho] = '\0';
     return tamanho;
 }
 
@@ -21,6 +22,6 @@ int lerStringBin(FILE* arquivo, char* string,int tamanho) {
  */
 int lerInteiroBin(FILE* arquivo) {
     int inteiroLido;
-	fread(&inteiroLido,sizeof(int),1,arquivo);
+    fread(&inteiroLido, sizeof(int), 1, arquivo);
     return inteiroLido;
 }

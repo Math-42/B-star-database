@@ -61,7 +61,7 @@ void imprimirCartao(char* descricao, char* cartao){
  * de registro total e dos campos variaveis
  * @param arquivoCSV nome do arquivo csv fonte dos dados
  * @param novaLinha variavel para salvar os dados
- * @return retorna 1 caso for o utimo registro e 0 caso contrário
+ * @return retorna 1 caso for o ultimo registro e 0 caso contrário
  */
 int lerLinha_CSV(FILE* arquivoCSV, linha* novaLinha) {
     int tamanhoRegistro = 0;
@@ -91,7 +91,7 @@ int lerLinha_CSV(FILE* arquivoCSV, linha* novaLinha) {
  * de registro total e dos campos variaveis
  * @param arquivoBin nome do arquivo binário fonte dos dados
  * @param currL variavel para salvar os dados
- * @return retorna 1 caso for o utimo registro e 0 caso contrário
+ * @return retorna 1 caso for o ultimo registro e 0 caso contrário
  */
 int lerLinha_Bin(FILE* arquivoBin, linha* currL) {
 

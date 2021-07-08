@@ -4,7 +4,7 @@
 
 int lerString(FILE* arquivo, char* string);
 int lerInteiro(FILE* arquivo);
-int lerStringFixa(FILE* arquivo, char* string,int tamanho);
+int lerStringFixa(FILE* arquivo, char* string, int tamanho);
 char foiRemovido(FILE* arquivo);
 
 #endif

@@ -3,6 +3,6 @@
 #include <stdio.h>
 
 int lerInteiroBin(FILE* arquivo);
-int lerStringBin(FILE* arquivo, char* string,int tamanho);
+int lerStringBin(FILE* arquivo, char* string, int tamanho);
 
 #endif
