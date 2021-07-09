@@ -6,5 +6,8 @@ teste_1: all
 	gcc testes.c -o execTestes && (./execTestes 24 casosDeTeste_1/ambienteTeste/) && rm execTestes
 teste_2: all
 	gcc testes.c -o execTestes && (./execTestes 12 casosDeTeste_2/ambienteTeste/) && rm execTestes
+teste: teste_1 teste_2
+zip:
+	zip -r entrega source/ main.c makefile 
 run:
 	./exec
