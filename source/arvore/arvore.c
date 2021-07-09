@@ -163,8 +163,20 @@ arvore* carregaArvore(char nomeArquivoIndice[]) {
     arvore* novaArvore = (arvore*)malloc(sizeof(arvore));
 
     novaArvore->arquivoIndice = fopen(nomeArquivoIndice, "r+");
-    if (novaArvore->arquivoIndice == NULL) printf("Arquivo nulo \n");
+
+    if (novaArvore->arquivoIndice == NULL) {
+        printf("Falha no processamento do arquivo.");
+        free(novaArvore);
+        return NULL;
+    }
+
     leHeaderArvore(novaArvore->arquivoIndice, &novaArvore->header);
+
+    if (novaArvore->header.status == '0') {
+        printf("Falha no processamento do arquivo.");
+        free(novaArvore);
+        return NULL;
+    }
 
     lerNoArvore(novaArvore, &novaArvore->raiz, novaArvore->header.noRaiz);
 
@@ -335,7 +347,7 @@ registro* insereNovoRegistro(arvore* currArvore, arvoreNo* currNo, registro novo
  * @return ponteiro para o registro que foi eleito ou NULL caso nenhum seja eleito
  */
 registro* buscaInsersaoRecursao(arvore* currArvore, arvoreNo* currNo, registro novoRegistro) {
-    if (currNo->folha == '1' || currArvore->header.noRaiz == 0) {//testa se é folha ou se raiz = folha
+    if (currNo->folha == '1' || currArvore->header.noRaiz == 0) {  //testa se é folha ou se raiz = folha
         return insereNovoRegistro(currArvore, currNo, novoRegistro);
     }
 
@@ -361,13 +373,12 @@ registro* buscaInsersaoRecursao(arvore* currArvore, arvoreNo* currNo, registro n
  * @param novoRegistro registro que será inserido
  */
 void insereRegistro(arvore* currArvore, registro novoRegistro) {
-    if (currArvore->header.noRaiz == -1) {// testa se já existe uma raiz, caso não exista ela será criada
+    if (currArvore->header.noRaiz == -1) {  // testa se já existe uma raiz, caso não exista ela será criada
         currArvore->raiz = criarNovoNo('0', currArvore->header.RRNproxNo);
         currArvore->header.noRaiz = currArvore->raiz.RRNdoNo;
         salvaNoArvore(currArvore, &currArvore->raiz, currArvore->header.RRNproxNo);
         currArvore->header.RRNproxNo++;
     }
-
 
     registro* registroEleitoParaRaiz = buscaInsersaoRecursao(currArvore, &currArvore->raiz, novoRegistro);
 
@@ -397,9 +408,9 @@ long int buscaRegistroRecursao(arvore* currArvore, arvoreNo* currNo, int chaveRe
     //se nãso achou decide o próximo nó
     int RRNproxReg = registroPai.C > chaveRegistro ? registroPai.P_ant : registroPai.P_prox;
 
-    if (RRNproxReg == -1) {//testa se existe o próximo nó
+    if (RRNproxReg == -1) {  //testa se existe o próximo nó
         return -1;
-    } else {//continua a busca
+    } else {  //continua a busca
         arvoreNo proxNo;
         lerNoArvore(currArvore, &proxNo, RRNproxReg);
         return buscaRegistroRecursao(currArvore, &proxNo, chaveRegistro);
