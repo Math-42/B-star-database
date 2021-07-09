@@ -413,7 +413,7 @@ void CreateIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArquivoBinInd
     arvore* novaArvore = criaArvore(nomeArquivoBinIndex);
 
     int isFinalDoArquivo = finalDoArquivo(arquivoBinRegistros);
-    
+
     //percorre todo o arquivo salvando apenas os registros salvos
     while (!isFinalDoArquivo) {
         registro novoRegistro;
@@ -450,6 +450,7 @@ void SelectFromWithIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArqui
     if (!validaHeader_linha(&arquivoBinRegistros, novoHeader, 1, 1)) return;
 
     arvore* novaArvore = carregaArvore(nomeArquivoBinIndex);
+    if (novaArvore == NULL) return;
 
     int isFinalDoArquivo = finalDoArquivo(arquivoBinRegistros);
     int byteOffset = buscaRegistro(novaArvore, valorBuscado);
@@ -464,4 +465,47 @@ void SelectFromWithIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArqui
 
     fclose(arquivoBinRegistros);
     finalizaArvore(novaArvore);
+}
+
+void InsertIntoWithIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100], int numeroDeEntradas) {
+    FILE* arquivoBinRegistros;
+    if (!abrirArquivo(&arquivoBinRegistros, nomeArquivoBinRegistros, "rb+", 1)) return;
+
+    linhaHeader header;
+
+    lerHeaderBin_Linha(arquivoBinRegistros, &header);
+    if (!validaHeader_linha(&arquivoBinRegistros, header, 1, 0)) return;
+
+    arvore* novaArvore = carregaArvore(nomeArquivoBinIndex);
+
+    if (novaArvore == NULL) return;
+
+    header.status = '0';
+    salvaHeader_Linha(arquivoBinRegistros, &header);
+
+    linha novaLinha;
+
+    while (numeroDeEntradas--) {
+        lerLinha_Terminal(&novaLinha);
+
+        registro novoRegistro;
+
+        novoRegistro.P_ant = -1;
+        novoRegistro.P_prox = -1;
+
+        novoRegistro.Pr = header.byteProxReg;  // pega o byteoffset de onde o novo veiculo vai estar
+
+        salvaLinha(arquivoBinRegistros, &novaLinha, &header);  // salvo o novo veículo no fim do binário
+
+        novoRegistro.C = novaLinha.codLinha;
+
+        if (novaLinha.removido == '1') insereRegistro(novaArvore, novoRegistro);
+    }
+
+    header.status = '1';
+    salvaHeader_Linha(arquivoBinRegistros, &header);
+
+    fclose(arquivoBinRegistros);
+    finalizaArvore(novaArvore);
+    binarioNaTela(nomeArquivoBinIndex);
 }

@@ -429,7 +429,7 @@ void CreateIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArquivoBinI
     arvore* novaArvore = criaArvore(nomeArquivoBinIndex);
 
     int isFinalDoArquivo = finalDoArquivo(arquivoBinRegistros);
-    
+
     //percorre todo o arquivo salvando apenas os registros salvos
     while (!isFinalDoArquivo) {
         registro novoRegistro;
@@ -466,10 +466,12 @@ void SelectFromWithIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArq
     if (!validaHeader_veiculo(&arquivoBinRegistros, novoHeader, 1, 1)) return;
 
     arvore* novaArvore = carregaArvore(nomeArquivoBinIndex);
+    if (novaArvore == NULL) return;
+
     int isFinalDoArquivo = finalDoArquivo(arquivoBinRegistros);
 
     int chave = convertePrefixo(valorBuscado);
-    int byteOffset = buscaRegistro(novaArvore, chave);
+    long int byteOffset = buscaRegistro(novaArvore, chave);
 
     // testa se encontrou o registro
     if (byteOffset != -1) {
@@ -478,7 +480,48 @@ void SelectFromWithIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArq
     } else {
         printf("Registro inexistente.");
     }
+    fclose(arquivoBinRegistros);
+    finalizaArvore(novaArvore);
+}
+
+void InsertIntoWithIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100], int numeroDeEntradas) {
+    FILE* arquivoBinRegistros;
+    if (!abrirArquivo(&arquivoBinRegistros, nomeArquivoBinRegistros, "rb+", 1)) return;
+
+    veiculoHeader header;
+
+    lerHeaderBin_Veiculo(arquivoBinRegistros, &header);
+    if (!validaHeader_veiculo(&arquivoBinRegistros, header, 1, 1)) return;
+
+    arvore* novaArvore = carregaArvore(nomeArquivoBinIndex);
+    if (novaArvore == NULL) return;
+
+    header.status = '0';
+    salvaHeader_Veiculo(arquivoBinRegistros, &header);
+
+    veiculo novoVeiculo;
+
+    while (numeroDeEntradas--) {
+        lerVeiculo_Terminal(&novoVeiculo);
+
+        registro novoRegistro;
+
+        novoRegistro.P_ant = -1;
+        novoRegistro.P_prox = -1;
+
+        novoRegistro.Pr = header.byteProxReg;  // pega o byteoffset de onde o novo veiculo vai estar
+
+        salvaVeiculo(arquivoBinRegistros, &novoVeiculo, &header);  // salvo o novo veículo no fim do binário
+
+        novoRegistro.C = convertePrefixo(novoVeiculo.prefixo);
+
+        if (novoVeiculo.removido == '1') insereRegistro(novaArvore, novoRegistro);
+    }
+
+    header.status = '1';
+    salvaHeader_Veiculo(arquivoBinRegistros, &header);
 
     fclose(arquivoBinRegistros);
     finalizaArvore(novaArvore);
+    binarioNaTela(nomeArquivoBinIndex);
 }

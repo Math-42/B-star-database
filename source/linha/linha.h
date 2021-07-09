@@ -30,5 +30,6 @@ void SelectFromWhere_Linha(char nomeArquivoBin[100], char* campo, char* valor);
 void InsertInto_Linha(char nomeArquivoBin[100], int numeroDeEntradas);
 void CreateIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100]);
 void SelectFromWithIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100], int valorBusca);
+void InsertIntoWithIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100], int numeroDeEntradas);
 
 #endif
