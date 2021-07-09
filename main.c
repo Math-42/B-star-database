@@ -21,9 +21,9 @@ void menu() {
     char nomeArquivoBinIndice[100];
     char nomeDoCampoBuscado[100];
     char valorBuscado[100];
+    int valorBuscadoVeiculoArvore;
+    scanf("%d", &funcionalidade);//le o modo que o programa deve operar
 
-    //scanf("%d", &funcionalidade);//le o modo que o programa deve operar
-    funcionalidade = 12;
     switch (funcionalidade) {
         case 1:
             scanf("%s %s", nomeArquivoCSV, nomeArquivoBin);
@@ -85,15 +85,32 @@ void menu() {
             break;
         case 11:
             scanf("%s", nomeArquivoBin);
-            scanf("%s", nomeArquivoBinIndice);
-            scanf("%s", valorBuscado);
-            SelectFromWithIndex_Veiculo(nomeArquivoBin, nomeArquivoBinIndice, valorBuscado);
+            scanf("%s", nomeDoCampoBuscado);
+            scanf("%*s");
+            scan_quote_string(valorBuscado);
+            SelectFromWithIndex_Veiculo(nomeArquivoBin, nomeDoCampoBuscado, valorBuscado);
             return;
             break;
         case 12:
-            // scanf("%s", nomeArquivoBin);
-            // scanf("%s", nomeArquivoBinIndice);
-            SelectFromWithIndex_Linha("linha11.bin", "indicePrefixo11.bin", 0);
+            scanf("%s", nomeArquivoBin);
+            scanf("%s", nomeDoCampoBuscado);
+            scanf("%*s");
+            scanf("%d",&valorBuscadoVeiculoArvore);
+            SelectFromWithIndex_Linha(nomeArquivoBin, nomeDoCampoBuscado, valorBuscadoVeiculoArvore);
+            return;
+            break;
+        case 13:
+            scanf("%s", nomeArquivoBin);
+            scanf("%s", nomeArquivoBinIndice);
+            scanf("%d", &numeroDeEntradas);
+            InsertIntoWithIndex_Veiculo(nomeArquivoBin, nomeArquivoBinIndice, numeroDeEntradas);
+            return;
+            break;
+        case 14:
+            scanf("%s", nomeArquivoBin);
+            scanf("%s", nomeArquivoBinIndice);
+            scanf("%d", &numeroDeEntradas);
+            InsertIntoWithIndex_Linha(nomeArquivoBin, nomeArquivoBinIndice, numeroDeEntradas);
             return;
             break;
         default:
