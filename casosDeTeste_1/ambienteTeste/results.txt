@@ -66,17 +66,8 @@ Resultados:
  
  
 23: 
-1c1
-< 26072.880000
----
-> 26109.630000
  
  
 24: 
-1c1
-< 5385.380000
----
-> 5382.720000
-\ Nenhum caractere de nova linha no final do arquivo
  
  
