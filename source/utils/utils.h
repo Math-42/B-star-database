@@ -11,5 +11,6 @@ int convertePrefixo(char* str);
 int stringToInt(char string[11], int tamanho);
 int lerStringTerminalFixa(char* string, int tamanhoMaximo);
 int lerStringTerminal(char string[100]);
+int lerInteiroTerminal();
 
 #endif

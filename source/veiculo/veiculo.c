@@ -108,8 +108,8 @@ void lerVeiculo_Terminal(veiculo* currV) {
     lerStringTerminalFixa(currV->prefixo, 5);
     lerStringTerminalFixa(currV->data, 10);
 
-    scanf("%d", &currV->quantidadeLugares);
-    scanf("%d", &currV->codLinha);
+    currV->quantidadeLugares = lerInteiroTerminal();
+    currV->codLinha = lerInteiroTerminal();
 
     currV->tamanhoModelo = lerStringTerminal(currV->modelo);
     currV->tamanhoCategoria = lerStringTerminal(currV->categoria);
@@ -424,7 +424,7 @@ void CreateIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArquivoBinI
     veiculo novoVeiculo;
 
     lerHeaderBin_Veiculo(arquivoBinRegistros, &novoHeader);
-    if (!validaHeader_veiculo(&arquivoBinRegistros, novoHeader, 1, 1)) return;
+    if (!validaHeader_veiculo(&arquivoBinRegistros, novoHeader, 1, 0)) return;
 
     arvore* novaArvore = criaArvore(nomeArquivoBinIndex);
 
@@ -463,7 +463,7 @@ void SelectFromWithIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArq
     veiculo novoVeiculo;
 
     lerHeaderBin_Veiculo(arquivoBinRegistros, &novoHeader);
-    if (!validaHeader_veiculo(&arquivoBinRegistros, novoHeader, 1, 1)) return;
+    if (!validaHeader_veiculo(&arquivoBinRegistros, novoHeader, 1, 0)) return;
 
     arvore* novaArvore = carregaArvore(nomeArquivoBinIndex);
     if (novaArvore == NULL) return;
@@ -491,7 +491,7 @@ void InsertIntoWithIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArq
     veiculoHeader header;
 
     lerHeaderBin_Veiculo(arquivoBinRegistros, &header);
-    if (!validaHeader_veiculo(&arquivoBinRegistros, header, 1, 1)) return;
+    if (!validaHeader_veiculo(&arquivoBinRegistros, header, 1, 0)) return;
 
     arvore* novaArvore = carregaArvore(nomeArquivoBinIndex);
     if (novaArvore == NULL) return;
