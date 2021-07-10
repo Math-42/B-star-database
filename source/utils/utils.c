@@ -114,6 +114,16 @@ int lerStringTerminalFixa(char* string, int tamanhoMaximo) {
     return tamanhoReal;
 }
 
+/**
+ * Lê um campo de inteiro do terminal
+ * @return retorna o inteiro lido ou -1 caso seja nulo
+ */
+int lerInteiroTerminal() {
+    char numero[5];
+    scanf("%s", numero);
+    return (numero[0] == 'N') ? -1 : atoi(numero);
+}
+
 // FUNCOES FORNECIDAS PELOS MONITORES
 void binarioNaTela(char* nomeArquivoBinario) { /* Você não precisa entender o código dessa função. */
 
@@ -181,9 +191,8 @@ void scan_quote_string(char* str) {
 }
 
 int convertePrefixo(char* str) {
-
     /* O registro que tem essa string como chave foi removido */
-    if(str[0] == '*')
+    if (str[0] == '*')
         return -1;
 
     /* Começamos com o primeiro digito na ordem de 36^0 = 1 */
@@ -191,8 +200,7 @@ int convertePrefixo(char* str) {
 
     /* Faz a conversão char por char para chegar ao resultado */
     int result = 0;
-    for(int i = 0; i < 5; i++) {
-
+    for (int i = 0; i < 5; i++) {
         /* 
             Interpreta o char atual como se fosse um digito
             em base 36. Os digitos da base 36 são:
@@ -202,10 +210,10 @@ int convertePrefixo(char* str) {
         */
         int cur_digit;
         /* Checa pelos digitos normais e os converte para números */
-        if(str[i] >= '0' && str[i] <= '9')
+        if (str[i] >= '0' && str[i] <= '9')
             cur_digit = str[i] - '0';
         /* Checa pelas letras e as converte para números */
-        else if(str[i] >= 'A' && str[i] <= 'Z')
+        else if (str[i] >= 'A' && str[i] <= 'Z')
             cur_digit = 10 + str[i] - 'A';
 
         /*
@@ -221,9 +229,7 @@ int convertePrefixo(char* str) {
 
         /* Aumenta a ordem atual */
         power *= 36;
-
     }
 
     return result;
-
 }

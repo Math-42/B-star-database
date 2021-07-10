@@ -121,7 +121,7 @@ void lerLinha_Terminal(linha* currL) {
     currL->tamanhoRegistro = 0;
     currL->removido = '1';
 
-    scanf("%d", &currL->codLinha);
+    currL->codLinha = lerInteiroTerminal();
 
     lerStringTerminalFixa(currL->aceitaCartao, 1);
 
@@ -370,6 +370,7 @@ void SelectFromWhere_Linha(char nomeArquivoBin[100], char* campo, char* valor) {
 void InsertInto_Linha(char nomeArquivoBin[100], int numeroDeEntradas) {
     FILE* arquivoBin;
     if (!abrirArquivo(&arquivoBin, nomeArquivoBin, "rb+", 1)) return;
+    
     linha novaLinha;
     linhaHeader header;
 
@@ -384,7 +385,7 @@ void InsertInto_Linha(char nomeArquivoBin[100], int numeroDeEntradas) {
     header.status = '0';
     salvaHeader_Linha(arquivoBin, &header);
 
-    while (numeroDeEntradas--) {
+    while (numeroDeEntradas --) {
         lerLinha_Terminal(&novaLinha);
         salvaLinha(arquivoBin, &novaLinha, &header);  // salvo o novo veículo no fim do binário
     }
