@@ -68,7 +68,7 @@ void menu() {
         case 8:
             scanf("%s", nomeArquivoBin);
             scanf("%d", &numeroDeEntradas);
-            InsertInto_Linha(nomeArquivoBin, 4);
+            InsertInto_Linha(nomeArquivoBin, numeroDeEntradas);
             return;
             break;
         case 9:
