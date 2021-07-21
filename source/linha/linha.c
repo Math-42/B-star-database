@@ -409,9 +409,11 @@ void CreateIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArquivoBinInd
     linha novaLinha;
 
     lerHeaderBin_Linha(arquivoBinRegistros, &novoHeader);
-    if (!validaHeader_linha(&arquivoBinRegistros, novoHeader, 1, 1)) return;
+    if (!validaHeader_linha(&arquivoBinRegistros, novoHeader, 1, 0)) return;
 
     arvore* novaArvore = criaArvore(nomeArquivoBinIndex);
+
+    alteraStatusArvore(novaArvore);
 
     int isFinalDoArquivo = finalDoArquivo(arquivoBinRegistros);
 
@@ -468,7 +470,14 @@ void SelectFromWithIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArqui
     finalizaArvore(novaArvore);
 }
 
+/**
+ *  Busca um registro recursivamente a partir da arvore B
+ * @param nomeArquivoBinRegistros nome do arquivo binário dos registros
+ * @param nomeArquivoBinIndex nome do arquivo binário contendo os indices
+ * @param valorBuscado valor único que está sendo buscado
+ */
 void InsertIntoWithIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100], int numeroDeEntradas) {
+    // procedimento padrão de abertura e validação dos arquivos
     FILE* arquivoBinRegistros;
     if (!abrirArquivo(&arquivoBinRegistros, nomeArquivoBinRegistros, "rb+", 1)) return;
 
@@ -479,30 +488,35 @@ void InsertIntoWithIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArqui
 
     arvore* novaArvore = carregaArvore(nomeArquivoBinIndex);
 
-    if (novaArvore == NULL) return;
+    if (novaArvore == NULL) {
+        fclose(arquivoBinRegistros);
+        return;
+    }
+
+    alteraStatusArvore(novaArvore);
 
     header.status = '0';
     salvaHeader_Linha(arquivoBinRegistros, &header);
 
     linha novaLinha;
 
-    while (numeroDeEntradas--) {
-        lerLinha_Terminal(&novaLinha);
+    while (numeroDeEntradas--) { // le n linhas
+        lerLinha_Terminal(&novaLinha); // le a linha a partir da entrada pelo terminal
 
-        registro novoRegistro;
+        registro novoRegistro;  // cria um novo registro para a árvore B
 
         novoRegistro.P_ant = -1;
         novoRegistro.P_prox = -1;
 
-        novoRegistro.Pr = header.byteProxReg;  // pega o byteoffset de onde o novo veiculo vai estar
+        novoRegistro.Pr = header.byteProxReg;   // pega o byteoffset de onde a nova linha vai estar
 
-        salvaLinha(arquivoBinRegistros, &novaLinha, &header);  // salvo o novo veículo no fim do binário
+        salvaLinha(arquivoBinRegistros, &novaLinha, &header);  // salva a linha no fim do arquivo de dados
 
         novoRegistro.C = novaLinha.codLinha;
 
-        if (novaLinha.removido == '1') insereRegistro(novaArvore, novoRegistro);
+        if (novaLinha.removido == '1') insereRegistro(novaArvore, novoRegistro); // insere o novo registro lido na árvore B
     }
-
+    // procedimento padrão de fechamento dos arquivos
     header.status = '1';
     salvaHeader_Linha(arquivoBinRegistros, &header);
 

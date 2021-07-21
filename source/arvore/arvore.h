@@ -48,6 +48,7 @@ typedef struct arvore {
 arvore* criaArvore(char* nomeArquivoIndice);
 arvore* carregaArvore(char* nomeArquivoIndice);
 
+void alteraStatusArvore(arvore* currArvore);
 void lerHeaderArvore(FILE* arquivoIndice, arvoreHeader* header);
 void salvaHeaderArvore(arvore* currArvore);
 void imprimeArvore(arvore* currArvore);

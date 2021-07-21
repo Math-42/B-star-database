@@ -428,6 +428,8 @@ void CreateIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArquivoBinI
 
     arvore* novaArvore = criaArvore(nomeArquivoBinIndex);
 
+    alteraStatusArvore(novaArvore);
+
     int isFinalDoArquivo = finalDoArquivo(arquivoBinRegistros);
 
     //percorre todo o arquivo salvando apenas os registros salvos
@@ -463,10 +465,13 @@ void SelectFromWithIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArq
     veiculo novoVeiculo;
 
     lerHeaderBin_Veiculo(arquivoBinRegistros, &novoHeader);
-    if (!validaHeader_veiculo(&arquivoBinRegistros, novoHeader, 1, 0)) return;
+    if (!validaHeader_veiculo(&arquivoBinRegistros, novoHeader, 1, 1)) return;
 
     arvore* novaArvore = carregaArvore(nomeArquivoBinIndex);
-    if (novaArvore == NULL) return;
+    if (novaArvore == NULL) {
+        fclose(arquivoBinRegistros);
+        return;
+    }
 
     int isFinalDoArquivo = finalDoArquivo(arquivoBinRegistros);
 
@@ -484,7 +489,14 @@ void SelectFromWithIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArq
     finalizaArvore(novaArvore);
 }
 
+/**
+ *  Insere n veículos novos no arquivo de dados e também os insere na árvore B 
+ * @param nomeArquivoBinRegistros nome do arquivo binário dos registros
+ * @param nomeArquivoBinIndex nome do arquivo binário contendo os indices
+ * @param numeroDeEntradas total de novos veículos que serão lidos e inseridos
+ */
 void InsertIntoWithIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100], int numeroDeEntradas) {
+    // procedimento padrão de abertura e validação dos arquivos
     FILE* arquivoBinRegistros;
     if (!abrirArquivo(&arquivoBinRegistros, nomeArquivoBinRegistros, "rb+", 1)) return;
 
@@ -494,30 +506,34 @@ void InsertIntoWithIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArq
     if (!validaHeader_veiculo(&arquivoBinRegistros, header, 1, 0)) return;
 
     arvore* novaArvore = carregaArvore(nomeArquivoBinIndex);
-    if (novaArvore == NULL) return;
+    if (novaArvore == NULL) {
+        fclose(arquivoBinRegistros);
+        return;
+    }
 
+    alteraStatusArvore(novaArvore);
     header.status = '0';
     salvaHeader_Veiculo(arquivoBinRegistros, &header);
 
     veiculo novoVeiculo;
 
-    while (numeroDeEntradas--) {
-        lerVeiculo_Terminal(&novoVeiculo);
+    while (numeroDeEntradas--) {  // le n veículos
+        lerVeiculo_Terminal(&novoVeiculo);  // le o veículo a partir da entrada pelo terminal
 
-        registro novoRegistro;
+        registro novoRegistro;  // cria um novo registro para a árvore B
 
         novoRegistro.P_ant = -1;
         novoRegistro.P_prox = -1;
 
         novoRegistro.Pr = header.byteProxReg;  // pega o byteoffset de onde o novo veiculo vai estar
 
-        salvaVeiculo(arquivoBinRegistros, &novoVeiculo, &header);  // salvo o novo veículo no fim do binário
+        salvaVeiculo(arquivoBinRegistros, &novoVeiculo, &header);  // salva o novo veículo no fim do arquivo de dados
 
-        novoRegistro.C = convertePrefixo(novoVeiculo.prefixo);
+        novoRegistro.C = convertePrefixo(novoVeiculo.prefixo); 
 
-        if (novoVeiculo.removido == '1') insereRegistro(novaArvore, novoRegistro);
+        if (novoVeiculo.removido == '1') insereRegistro(novaArvore, novoRegistro); // insere o novo registro lido na árvore B
     }
-
+    // procedimento padrão de fechamento dos arquivos
     header.status = '1';
     salvaHeader_Veiculo(arquivoBinRegistros, &header);
 

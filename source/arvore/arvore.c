@@ -105,6 +105,16 @@ void finalizaArvore(arvore* currArvore) {
 }
 
 /**
+ *  Altera o status da arvore
+ * @param currArvore arvore a ter o status alterado
+ * 
+ */
+void alteraStatusArvore(arvore* currArvore) {
+    currArvore->header.status = '0';
+    salvaHeaderArvore(currArvore);
+}
+
+/**
  * Cria um novo nó de arbore b
  * @param isFolha define se o nó criado será folha ou não
  * @param RRndoNo RRN do nó que será criado
@@ -174,6 +184,7 @@ arvore* carregaArvore(char nomeArquivoIndice[]) {
 
     if (novaArvore->header.status == '0') {
         printf("Falha no processamento do arquivo.");
+        fclose(novaArvore->arquivoIndice);
         free(novaArvore);
         return NULL;
     }
@@ -246,7 +257,7 @@ void insereRegistroOrdenado(registro registros[], registro novoRegistro, int tam
     }
 
     registros[i] = novoRegistro;
-    if (i + 1 < ORDEM_ARVORE) registros[i + 1].P_ant = novoRegistro.P_prox;
+    if (i + 1 < ORDEM_ARVORE - 1) registros[i + 1].P_ant = novoRegistro.P_prox;
 }
 
 /**
