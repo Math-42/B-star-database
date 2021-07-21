@@ -298,6 +298,18 @@ void SelectFrom_Veiculo(char nomeArquivoBin[100]) {
 }
 
 /**
+ * Compara dois veiculos
+ * @param veiculoA primeiro veiculo
+ * @param veiculoB segundo veiculo
+ * @return retorna veiculoA->codLinha - veiculoB->codLinha
+ */
+int compararVeiculos(const void* veiculoA, const void* veiculoB) {
+    int a = (*(veiculo*)veiculoA).codLinha;
+    int b = (*(veiculo*)veiculoB).codLinha;
+    return a - b;
+}
+
+/**
  * A busca por um campo em específico é feita pela a
  * varredura da posição do campo correspondente a ser buscado no cabeçalho, após
  * isso percorre os registros todos os dados nessa respectiva posição e então
@@ -517,7 +529,7 @@ void InsertIntoWithIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArq
 
     veiculo novoVeiculo;
 
-    while (numeroDeEntradas--) {  // le n veículos
+    while (numeroDeEntradas--) {            // le n veículos
         lerVeiculo_Terminal(&novoVeiculo);  // le o veículo a partir da entrada pelo terminal
 
         registro novoRegistro;  // cria um novo registro para a árvore B
@@ -529,9 +541,9 @@ void InsertIntoWithIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArq
 
         salvaVeiculo(arquivoBinRegistros, &novoVeiculo, &header);  // salva o novo veículo no fim do arquivo de dados
 
-        novoRegistro.C = convertePrefixo(novoVeiculo.prefixo); 
+        novoRegistro.C = convertePrefixo(novoVeiculo.prefixo);
 
-        if (novoVeiculo.removido == '1') insereRegistro(novaArvore, novoRegistro); // insere o novo registro lido na árvore B
+        if (novoVeiculo.removido == '1') insereRegistro(novaArvore, novoRegistro);  // insere o novo registro lido na árvore B
     }
     // procedimento padrão de fechamento dos arquivos
     header.status = '1';
@@ -540,4 +552,63 @@ void InsertIntoWithIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArq
     fclose(arquivoBinRegistros);
     finalizaArvore(novaArvore);
     binarioNaTela(nomeArquivoBinIndex);
+}
+
+/**
+ * Cria um arquivo binário com os registros ordenados a partir de um binário desordenado
+ * @param nomeArquivoBinDesordenado nome do arquivo bin fonte dos dados
+ * @param nomeArquivoBIn nome do arquivo binário onde os dados serão salvos ordenadamente
+ */
+void SortReg_Veiculo(char nomeArquivoBinDesordenado[100], char nomeArquivoBin[100]) {
+    FILE* arquivoBinOrdenado;
+    FILE* arquivoBinDesordenado;
+
+    if (!abrirArquivo(&arquivoBinDesordenado, nomeArquivoBinDesordenado, "r", 1)) return;
+
+    veiculoHeader header;
+
+    lerHeaderBin_Veiculo(arquivoBinDesordenado, &header);
+    if (!validaHeader_veiculo(&arquivoBinDesordenado, header, 1, 0)) return;
+
+    abrirArquivo(&arquivoBinOrdenado, nomeArquivoBin, "wb", 0);
+
+    veiculoHeader novoHeader = header;
+    veiculo novoVeiculo;
+
+    //definindo valores iniciais do header
+    novoHeader.status = '0';
+    novoHeader.byteProxReg = 175;
+    novoHeader.nroRegistros = 0;
+    novoHeader.nroRegRemovidos = 0;
+
+    salvaHeader_Veiculo(arquivoBinOrdenado, &novoHeader);
+
+    int isFinalDoArquivo = finalDoArquivo(arquivoBinDesordenado);
+
+    //aloca array para salvar os dados
+    veiculo* arrayDeVeiculos = malloc(header.nroRegistros * sizeof(veiculo));
+    int posAtual = 0;
+
+    //percorre o arquivo até o final
+    while (!isFinalDoArquivo) {
+        isFinalDoArquivo = lerVeiculo_Bin(arquivoBinDesordenado, &novoVeiculo, -1);
+        if (novoVeiculo.removido == '1') arrayDeVeiculos[posAtual++] = novoVeiculo;
+    }
+
+    qsort(arrayDeVeiculos, header.nroRegistros, sizeof(veiculo), compararVeiculos);
+
+    for (int i = 0; i < header.nroRegistros;i++){
+        salvaVeiculo(arquivoBinOrdenado, &arrayDeVeiculos[i], &novoHeader);
+    }
+
+    novoHeader.status = '1';
+
+    salvaHeader_Veiculo(arquivoBinOrdenado, &novoHeader);  //finaliza e salva o header
+
+    //fecha todos arquivos abertos e libera memória
+    fclose(arquivoBinOrdenado);
+    fclose(arquivoBinDesordenado);
+    free(arrayDeVeiculos);
+
+    binarioNaTela(nomeArquivoBin);
 }
