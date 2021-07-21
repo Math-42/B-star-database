@@ -31,5 +31,6 @@ void InsertInto_Linha(char nomeArquivoBin[100], int numeroDeEntradas);
 void CreateIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100]);
 void SelectFromWithIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100], int valorBusca);
 void InsertIntoWithIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100], int numeroDeEntradas);
+void SortReg_Linha(char nomeArquivoBinDesordenado[100], char nomeArquivoBin[100]);
 
 #endif

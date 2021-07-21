@@ -221,6 +221,18 @@ void salvaHeader_Linha(FILE* arquivoBin, linhaHeader* header) {
 }
 
 /**
+ * Compara duas linhas
+ * @param linhaA primeira linha
+ * @param linhaB segunda linha
+ * @return retorna linhaA->codLinha - linhaB->codLinha
+ */
+int compararLinhas(const void* linhaA, const void* linhaB) {
+    int a = (*(linha*)linhaA).codLinha;
+    int b = (*(linha*)linhaB).codLinha;
+    return a - b;
+}
+
+/**
  * Cria um arquivo binário na estrutura solicitada de header e campos a partir de um arquivo CSV
  * @param nomeArquivoCSV nome do arquivo csv fonte dos dados
  * @param nomeArquivoBin nome do arquivo binário onde os dados serão salvos
@@ -523,4 +535,63 @@ void InsertIntoWithIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArqui
     fclose(arquivoBinRegistros);
     finalizaArvore(novaArvore);
     binarioNaTela(nomeArquivoBinIndex);
+}
+
+/**
+ * Cria um arquivo binário com os registros ordenados a partir de um binário desordenado
+ * @param nomeArquivoBinDesordenado nome do arquivo bin fonte dos dados
+ * @param nomeArquivoBIn nome do arquivo binário onde os dados serão salvos ordenadamente
+ */
+void SortReg_Linha(char nomeArquivoBinDesordenado[100], char nomeArquivoBin[100]) {
+    FILE* arquivoBinOrdenado;
+    FILE* arquivoBinDesordenado;
+
+    if (!abrirArquivo(&arquivoBinDesordenado, nomeArquivoBinDesordenado, "r", 1)) return;
+
+    linhaHeader header;
+
+    lerHeaderBin_Linha(arquivoBinDesordenado, &header);
+    if (!validaHeader_linha(&arquivoBinDesordenado, header, 1, 0)) return;
+
+    abrirArquivo(&arquivoBinOrdenado, nomeArquivoBin, "wb", 0);
+
+    linhaHeader novoHeader = header;
+    linha novaLinha;
+
+    //definindo valores iniciais do header
+    novoHeader.status = '0';
+    novoHeader.byteProxReg = 82;
+    novoHeader.nroRegistros = 0;
+    novoHeader.nroRegRemovidos = 0;
+
+    salvaHeader_Linha(arquivoBinOrdenado, &novoHeader);
+
+    int isFinalDoArquivo = finalDoArquivo(arquivoBinDesordenado);
+
+    //aloca array para salvar os dados
+    linha* arrayDeLinhas = malloc(header.nroRegistros * sizeof(linha));
+    int posAtual = 0;
+
+    //percorre o arquivo até o final
+    while (!isFinalDoArquivo) {
+        isFinalDoArquivo = lerLinha_Bin(arquivoBinDesordenado, &novaLinha, -1);
+        if (novaLinha.removido == '1') arrayDeLinhas[posAtual++] = novaLinha;
+    }
+
+    qsort(arrayDeLinhas, header.nroRegistros, sizeof(linha), compararLinhas);
+
+    for (int i = 0; i < header.nroRegistros; i++) {
+        salvaLinha(arquivoBinOrdenado, &arrayDeLinhas[i], &novoHeader);
+    }
+
+    novoHeader.status = '1';
+
+    salvaHeader_Linha(arquivoBinOrdenado, &novoHeader);  //finaliza e salva o header
+
+    //fecha todos arquivos abertos e libera memória
+    fclose(arquivoBinOrdenado);
+    fclose(arquivoBinDesordenado);
+    free(arrayDeLinhas);
+
+    binarioNaTela(nomeArquivoBin);
 }
