@@ -22,7 +22,7 @@ int main(int argc, char const *argv[]) {
         sprintf(buffer, "cd ./%s%d_out/", argv[2], i);
         system(buffer);
 
-        sprintf(buffer, "(cd ./%s%d_out/ && ((valgrind --leak-check=full -s ./exec) < %d.in) > %d.out)", argv[2], i, i, i);
+        sprintf(buffer, "(cd ./%s%d_out/ && ((valgrind --leak-check=full --show-leak-kinds=all -s ./exec) < %d.in) > %d.out)", argv[2], i, i, i);
         system(buffer);
 
         sprintf(buffer, "(cd ./%s%d_out/ && rm exec)", argv[2], i);
