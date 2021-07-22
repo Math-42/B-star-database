@@ -23,7 +23,11 @@ typedef struct linha {
     char corLinha[100];
 } linha;
 
-//Apenas as funcionalidades são expostas pela biblioteca
+void imprimeLinha(linha currLinha, linhaHeader header, int quebraLinha);
+int validaHeader_linha(FILE** arquivo, linhaHeader header, int verificaConsistencia, int verificaRegistros);
+int lerLinha_Bin(FILE* arquivoBin, linha* currL, long int pos);
+void lerHeaderBin_Linha(FILE* arquivoBin, linhaHeader* header);
+
 void SelectFrom_Linha(char nomeArquivoBin[100]);
 void CreateTable_Linha(char nomeArquivoCSV[100], char nomeArquivoBin[100]);
 void SelectFromWhere_Linha(char nomeArquivoBin[100], char* campo, char* valor);
