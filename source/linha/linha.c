@@ -8,6 +8,7 @@
 #include "../binario/binario.h"
 #include "../csv/csv.h"
 #include "../utils/utils.h"
+#include "../veiculo/veiculo.h"
 
 /**
  *  Valida o header de um arquivo
@@ -512,21 +513,21 @@ void InsertIntoWithIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArqui
 
     linha novaLinha;
 
-    while (numeroDeEntradas--) { // le n linhas
-        lerLinha_Terminal(&novaLinha); // le a linha a partir da entrada pelo terminal
+    while (numeroDeEntradas--) {        // le n linhas
+        lerLinha_Terminal(&novaLinha);  // le a linha a partir da entrada pelo terminal
 
         registro novoRegistro;  // cria um novo registro para a árvore B
 
         novoRegistro.P_ant = -1;
         novoRegistro.P_prox = -1;
 
-        novoRegistro.Pr = header.byteProxReg;   // pega o byteoffset de onde a nova linha vai estar
+        novoRegistro.Pr = header.byteProxReg;  // pega o byteoffset de onde a nova linha vai estar
 
         salvaLinha(arquivoBinRegistros, &novaLinha, &header);  // salva a linha no fim do arquivo de dados
 
         novoRegistro.C = novaLinha.codLinha;
 
-        if (novaLinha.removido == '1') insereRegistro(novaArvore, novoRegistro); // insere o novo registro lido na árvore B
+        if (novaLinha.removido == '1') insereRegistro(novaArvore, novoRegistro);  // insere o novo registro lido na árvore B
     }
     // procedimento padrão de fechamento dos arquivos
     header.status = '1';
@@ -596,6 +597,57 @@ int SortReg_Linha(char nomeArquivoBinDesordenado[100], char nomeArquivoBin[100])
     return 1;
 }
 
+/**
+ * Faz uma junção dos registros de veiculos e linhas com base no campo codLinha
+ * @param nomeArquivoVeiculos nome do arquivo bin ordenado, fonte dos dados dos veiculos
+ * @param nomeArquivoLinha nome do arquivo bin ordenado, fonte dos dados das linhas
+ */
+void Search_LinhaVeiculo(char nomeArquivoVeiculos[100], char nomeArquivoLinha[100]) {
+    FILE* arquivoBinLinhas;
+    FILE* arquivoBinVeiculos;
 
-    binarioNaTela(nomeArquivoBin);
+    if (!abrirArquivo(&arquivoBinLinhas, nomeArquivoLinha, "r", 1)) return;
+    if (!abrirArquivo(&arquivoBinVeiculos, nomeArquivoVeiculos, "r", 1)) return;
+
+    linhaHeader headerLinha;
+    veiculoHeader headerVeiculo;
+
+    lerHeaderBin_Linha(arquivoBinLinhas, &headerLinha);
+    if (!validaHeader_linha(&arquivoBinLinhas, headerLinha, 1, 1)) return;
+
+    lerHeaderBin_Veiculo(arquivoBinVeiculos, &headerVeiculo);
+    if (!validaHeader_veiculo(&arquivoBinVeiculos, headerVeiculo, 1, 1)) return;
+
+    linha novaLinha;
+    veiculo novoVeiculo;
+    int achouPeloMenosUm = 0;
+
+    lerLinha_Bin(arquivoBinLinhas, &novaLinha, -1);
+    lerVeiculo_Bin(arquivoBinVeiculos, &novoVeiculo, -1);
+
+    int qtdVeiculos = headerVeiculo.nroRegistros;
+    int qtdLinhas = headerLinha.nroRegistros;
+
+    //percorre o arquivo até o final
+    while (qtdVeiculos && qtdLinhas) {
+        if (novaLinha.codLinha == novoVeiculo.codLinha) {
+            imprimeVeiculo(novoVeiculo, headerVeiculo, 0);
+            imprimeLinha(novaLinha, headerLinha, 1);
+            lerVeiculo_Bin(arquivoBinVeiculos, &novoVeiculo, -1);
+            qtdVeiculos--;
+            achouPeloMenosUm = 1;
+        } else if (novaLinha.codLinha < novoVeiculo.codLinha) {
+            lerLinha_Bin(arquivoBinLinhas, &novaLinha, -1);
+            qtdLinhas--;
+        } else {
+            lerVeiculo_Bin(arquivoBinVeiculos, &novoVeiculo, -1);
+            qtdVeiculos--;
+        }
+    }
+
+    if (!achouPeloMenosUm) printf("Registro inexistente.");
+
+    //fecha todos arquivos abertos e libera memória
+    fclose(arquivoBinLinhas);
+    fclose(arquivoBinVeiculos);
 }

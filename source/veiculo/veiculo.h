@@ -29,7 +29,11 @@ typedef struct veiculo {
     char categoria[100];
 } veiculo;
 
-//Apenas as funcionalidades são expostas pela biblioteca
+void imprimeVeiculo(veiculo currVeiculo, veiculoHeader header, int quebraLinha);
+int lerVeiculo_Bin(FILE* arquivoBin, veiculo* currV, long int pos);
+void lerHeaderBin_Veiculo(FILE* arquivoBin, veiculoHeader* header);
+int validaHeader_veiculo(FILE** arquivo, veiculoHeader header, int verificaConsistencia, int verificaRegistros);
+
 void SelectFrom_Veiculo(char nomeArquivoBin[100]);
 void CreateTable_Veiculo(char nomeArquivoCSV[100], char nomeArquivoBin[100]);
 void SelectFromWhere_Veiculo(char nomeArquivoBin[100], char* campo, char* valor);
@@ -37,6 +41,6 @@ void InsertInto_Veiculo(char nomeArquivoBin[100], int numeroDeEntradas);
 void CreateIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100]);
 void SelectFromWithIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100], char valorBuscado[6]);
 void InsertIntoWithIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100], int numeroDeEntradas);
-void SortReg_Veiculo(char nomeArquivoBinDesordenado[100], char nomeArquivoBin[100]);
+int SortReg_Veiculo(char nomeArquivoBinDesordenado[100], char nomeArquivoBin[100]);
 
 #endif
