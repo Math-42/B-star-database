@@ -104,13 +104,14 @@ void menu() {
             scanf("%s", nomeArquivoBin);
             scanf("%s", nomeArquivoBinOrdenado);
             scanf("%*s");
-            SortReg_Veiculo(nomeArquivoBin, nomeArquivoBinOrdenado);
+            if (SortReg_Veiculo(nomeArquivoBin, nomeArquivoBinOrdenado)) binarioNaTela(nomeArquivoBinOrdenado);
             break;
         case 18:
             scanf("%s", nomeArquivoBin);
             scanf("%s", nomeArquivoBinOrdenado);
             scanf("%*s");
-            SortReg_Linha(nomeArquivoBin, nomeArquivoBinOrdenado);
+            if (SortReg_Linha(nomeArquivoBin, nomeArquivoBinOrdenado)) binarioNaTela(nomeArquivoBinOrdenado);
+            break;
             break;
         default:
             break;

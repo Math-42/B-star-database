@@ -560,16 +560,16 @@ void InsertIntoWithIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArq
  * @param nomeArquivoBinDesordenado nome do arquivo bin fonte dos dados
  * @param nomeArquivoBIn nome do arquivo binário onde os dados serão salvos ordenadamente
  */
-void SortReg_Veiculo(char nomeArquivoBinDesordenado[100], char nomeArquivoBin[100]) {
+int SortReg_Veiculo(char nomeArquivoBinDesordenado[100], char nomeArquivoBin[100]) {
     FILE* arquivoBinOrdenado;
     FILE* arquivoBinDesordenado;
 
-    if (!abrirArquivo(&arquivoBinDesordenado, nomeArquivoBinDesordenado, "r", 1)) return;
+    if (!abrirArquivo(&arquivoBinDesordenado, nomeArquivoBinDesordenado, "r", 1)) return 0;
 
     veiculoHeader header;
 
     lerHeaderBin_Veiculo(arquivoBinDesordenado, &header);
-    if (!validaHeader_veiculo(&arquivoBinDesordenado, header, 1, 0)) return;
+    if (!validaHeader_veiculo(&arquivoBinDesordenado, header, 1, 0)) return 0;
 
     abrirArquivo(&arquivoBinOrdenado, nomeArquivoBin, "wb", 0);
 
@@ -598,7 +598,7 @@ void SortReg_Veiculo(char nomeArquivoBinDesordenado[100], char nomeArquivoBin[10
 
     qsort(arrayDeVeiculos, header.nroRegistros, sizeof(veiculo), compararVeiculos);
 
-    for (int i = 0; i < header.nroRegistros;i++){
+    for (int i = 0; i < header.nroRegistros; i++) {
         salvaVeiculo(arquivoBinOrdenado, &arrayDeVeiculos[i], &novoHeader);
     }
 
@@ -611,5 +611,5 @@ void SortReg_Veiculo(char nomeArquivoBinDesordenado[100], char nomeArquivoBin[10
     fclose(arquivoBinDesordenado);
     free(arrayDeVeiculos);
 
-    binarioNaTela(nomeArquivoBin);
+    return 1;
 }

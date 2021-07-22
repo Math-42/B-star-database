@@ -541,17 +541,18 @@ void InsertIntoWithIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArqui
  * Cria um arquivo binário com os registros ordenados a partir de um binário desordenado
  * @param nomeArquivoBinDesordenado nome do arquivo bin fonte dos dados
  * @param nomeArquivoBIn nome do arquivo binário onde os dados serão salvos ordenadamente
+ * @return retorna 1 caso consiga ordenar e 0 caso contrário
  */
-void SortReg_Linha(char nomeArquivoBinDesordenado[100], char nomeArquivoBin[100]) {
+int SortReg_Linha(char nomeArquivoBinDesordenado[100], char nomeArquivoBin[100]) {
     FILE* arquivoBinOrdenado;
     FILE* arquivoBinDesordenado;
 
-    if (!abrirArquivo(&arquivoBinDesordenado, nomeArquivoBinDesordenado, "r", 1)) return;
+    if (!abrirArquivo(&arquivoBinDesordenado, nomeArquivoBinDesordenado, "r", 1)) return 0;
 
     linhaHeader header;
 
     lerHeaderBin_Linha(arquivoBinDesordenado, &header);
-    if (!validaHeader_linha(&arquivoBinDesordenado, header, 1, 0)) return;
+    if (!validaHeader_linha(&arquivoBinDesordenado, header, 1, 0)) return 0;
 
     abrirArquivo(&arquivoBinOrdenado, nomeArquivoBin, "wb", 0);
 
@@ -592,6 +593,9 @@ void SortReg_Linha(char nomeArquivoBinDesordenado[100], char nomeArquivoBin[100]
     fclose(arquivoBinOrdenado);
     fclose(arquivoBinDesordenado);
     free(arrayDeLinhas);
+    return 1;
+}
+
 
     binarioNaTela(nomeArquivoBin);
 }
