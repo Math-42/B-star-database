@@ -466,7 +466,11 @@ void SelectFromWithIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArqui
     if (!validaHeader_linha(&arquivoBinRegistros, novoHeader, 1, 1)) return;
 
     arvore* novaArvore = carregaArvore(nomeArquivoBinIndex);
-    if (novaArvore == NULL) return;
+    
+    if (novaArvore == NULL) {
+        fclose(arquivoBinRegistros);
+        return;
+    }
 
     int isFinalDoArquivo = finalDoArquivo(arquivoBinRegistros);
     int byteOffset = buscaRegistro(novaArvore, valorBuscado);
