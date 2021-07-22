@@ -37,7 +37,7 @@ int main(int argc, char const *argv[]) {
     sprintf(buffer, "echo \"Resultados: \" > %sresults.txt", argv[2]);
     system(buffer);
 
-    for (int i = 10; i <= numberOfTests; i++) {
+    for (int i = 1; i <= numberOfTests; i++) {
         sprintf(buffer, "echo  '%d: ' >> %sresults.txt", i, argv[2]);
         system(buffer);
 
