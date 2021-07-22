@@ -18,6 +18,7 @@ void menu() {
     int funcionalidade, numeroDeEntradas;
     char nomeArquivoCSV[100];
     char nomeArquivoBin[100];
+    char nomeArquivoBin2[100];
     char nomeArquivoBinOrdenado[100];
     char nomeArquivoBinIndice[100];
     char nomeDoCampoBuscado[100];
@@ -112,6 +113,13 @@ void menu() {
             scanf("%*s");
             if (SortReg_Linha(nomeArquivoBin, nomeArquivoBinOrdenado)) binarioNaTela(nomeArquivoBinOrdenado);
             break;
+        case 19:
+            scanf("%s", nomeArquivoBin);
+            scanf("%s", nomeArquivoBin2);
+            scanf("%*s %*s");
+            if (!SortReg_Veiculo(nomeArquivoBin, "veiculo-ordenado.bin")) return;
+            if (!SortReg_Linha(nomeArquivoBin2, "linha-ordenado.bin")) return;
+            Search_LinhaVeiculo("veiculo-ordenado.bin", "linha-ordenado.bin");
             break;
         default:
             break;
