@@ -42,5 +42,7 @@ void CreateIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArquivoBinI
 void SelectFromWithIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100], char valorBuscado[6]);
 void InsertIntoWithIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArquivoBinIndex[100], int numeroDeEntradas);
 int SortReg_Veiculo(char nomeArquivoBinDesordenado[100], char nomeArquivoBin[100]);
+void SelectFromWhereNestedLoop(char nomeArquivoBinVeiculo[100], char nomeArquivoBinLinha[100]);
+void SelectFromWhereUniqueLoop(char nomeArquivoBinVeiculo[100], char nomeArquivoBinLinha[100], char nomeArquivoBinIndex[100]);
 
 #endif

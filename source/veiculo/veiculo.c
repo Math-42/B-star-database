@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../linha/linha.h"
 #include "../arvore/arvore.h"
 #include "../binario/binario.h"
 #include "../csv/csv.h"
@@ -612,4 +613,142 @@ int SortReg_Veiculo(char nomeArquivoBinDesordenado[100], char nomeArquivoBin[100
     free(arrayDeVeiculos);
 
     return 1;
+}
+
+/**
+ *  Faz a junção dos arquivos de dados dos veiculos com os de linha com método brute force de loop aninhado
+ * @param nomeArquivoBinVeiculo nome do arquivo binário dos registros do veiculo
+ * @param nomeArquivoBinLinha nome do arquivo binário dos registros da linha
+ */
+void SelectFromWhereNestedLoop(char nomeArquivoBinVeiculo[100], char nomeArquivoBinLinha[100]){
+    // abre e valida os arquivos do veiculo
+
+    FILE* arquivoBin_Veiculo;
+    if (!abrirArquivo(&arquivoBin_Veiculo, nomeArquivoBinVeiculo, "rb", 1)) return;
+
+    veiculoHeader novoHeader_Veiculo;
+    veiculo novoVeiculo;
+
+    lerHeaderBin_Veiculo(arquivoBin_Veiculo, &novoHeader_Veiculo);
+    if (!validaHeader_veiculo(&arquivoBin_Veiculo, novoHeader_Veiculo, 1, 1)) return;
+
+    // abre e valida os arquivos da linha
+
+    FILE* arquivoBin_Linha;
+    if (!abrirArquivo(&arquivoBin_Linha, nomeArquivoBinLinha, "rb", 1)) return;
+
+    linhaHeader novoHeader_Linha;
+    linha novaLinha;
+
+    lerHeaderBin_Linha(arquivoBin_Linha, &novoHeader_Linha);
+    if (!validaHeader_linha(&arquivoBin_Linha, novoHeader_Linha, 1, 1)) return;
+
+
+    int isFinalDoArquivoVeiculo = finalDoArquivo(arquivoBin_Veiculo);
+
+    int existe = 0;
+
+    //percorre todo o arquivo de registro de veiculos
+    while (!isFinalDoArquivoVeiculo) {
+        isFinalDoArquivoVeiculo = lerVeiculo_Bin(arquivoBin_Veiculo, &novoVeiculo, -1);
+
+        // para cada veiculo n removido, percorre todo o arquivo de registro da linha
+        if (novoVeiculo.removido == '1'){
+            int isFinalDoArquivoLinha = finalDoArquivo(arquivoBin_Linha);
+
+            while(!isFinalDoArquivoLinha){
+                isFinalDoArquivoLinha = lerLinha_Bin(arquivoBin_Linha, &novaLinha, -1);
+
+                // compara se o veiculo atual e a linha atual tem match no campo codLinha
+                if (novaLinha.removido == '1' && novoVeiculo.codLinha == novaLinha.codLinha){
+                    // printa o registro no formato solicitado
+                    imprimeVeiculo(novoVeiculo, novoHeader_Veiculo, 0);
+                    imprimeLinha(novaLinha, novoHeader_Linha, 1);
+
+                    existe = 1;
+                    break;
+                }
+            }
+            
+            // reposiciona o ponteiro do arquivo de dados da linha para o primeiro registro de dados
+            fseek(arquivoBin_Linha, 82, 0); 
+        }
+    }
+    // caso a junção for vazia (nenhum registro deu match)
+    if(!existe){
+        printf("Registro inexistente.");
+    }
+
+    fclose(arquivoBin_Veiculo);
+    fclose(arquivoBin_Linha);
+}
+
+/**
+ *  Faz a junção dos arquivos de dados dos veiculos com os de linha com método de busca pela árvore B
+ * @param nomeArquivoBinVeiculo nome do arquivo binário dos registros do veiculo
+ * @param nomeArquivoBinLinha nome do arquivo binário dos registros da linha
+ * @param nomeArquivoBinIndex nome do arquivo binário contendo os indices da linha
+ */
+void SelectFromWhereUniqueLoop(char nomeArquivoBinVeiculo[100], char nomeArquivoBinLinha[100], char nomeArquivoBinIndex[100]){
+    // abre e valida os arquivos do veiculo
+
+    FILE* arquivoBin_Veiculo;
+    if (!abrirArquivo(&arquivoBin_Veiculo, nomeArquivoBinVeiculo, "rb", 1)) return;
+
+    veiculoHeader novoHeader_Veiculo;
+    veiculo novoVeiculo;
+
+    lerHeaderBin_Veiculo(arquivoBin_Veiculo, &novoHeader_Veiculo);
+    if (!validaHeader_veiculo(&arquivoBin_Veiculo, novoHeader_Veiculo, 1, 1)) return;
+
+    // abre e valida os arquivos da linha
+
+    FILE* arquivoBin_Linha;
+    if (!abrirArquivo(&arquivoBin_Linha, nomeArquivoBinLinha, "rb", 1)) return;
+
+    linhaHeader novoHeader_Linha;
+    linha novaLinha;
+
+    lerHeaderBin_Linha(arquivoBin_Linha, &novoHeader_Linha);
+    if (!validaHeader_linha(&arquivoBin_Linha, novoHeader_Linha, 1, 1)) return;
+
+    // abre e valida os arquivos da arvore B da linha
+
+    arvore* novaArvore = carregaArvore(nomeArquivoBinIndex);
+    if (novaArvore == NULL) {
+        fclose(arquivoBin_Veiculo);
+        return;
+    }
+
+    int isFinalDoArquivoVeiculo = finalDoArquivo(arquivoBin_Veiculo);
+
+    int existe = 0;
+
+    //percorre todo o arquivo de registro de veiculos
+    while (!isFinalDoArquivoVeiculo) {
+        isFinalDoArquivoVeiculo = lerVeiculo_Bin(arquivoBin_Veiculo, &novoVeiculo, -1);
+
+        if (novoVeiculo.removido == '1'){
+            // procura o codLinha do veiculo nos indices da linha
+            long int byteOffset = buscaRegistro(novaArvore, novoVeiculo.codLinha);
+
+            // testa se encontrou o registro
+            if (byteOffset != -1) {
+                lerLinha_Bin(arquivoBin_Linha, &novaLinha, byteOffset);
+                
+                // printa o registro no formato solicitado
+                imprimeVeiculo(novoVeiculo, novoHeader_Veiculo, 0);
+                imprimeLinha(novaLinha, novoHeader_Linha, 1);
+
+                existe = 1;
+            }
+        }
+    }
+    // caso a junção for vazia (nenhum registro deu match)
+    if(!existe){
+        printf("Registro inexistente.");
+    }
+
+    fclose(arquivoBin_Veiculo);
+    fclose(arquivoBin_Linha);
 }
