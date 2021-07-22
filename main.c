@@ -101,6 +101,23 @@ void menu() {
             scanf("%d", &numeroDeEntradas);
             InsertIntoWithIndex_Linha(nomeArquivoBin, nomeArquivoBinIndice, numeroDeEntradas);
             break;
+        case 15:
+            scanf("%s", nomeArquivoBin);
+            scanf("%s", nomeArquivoBin2);
+            scanf("%*s");
+            scanf("%*s");
+            SelectFromWhereNestedLoop(nomeArquivoBin, nomeArquivoBin2);
+            return;
+            break;
+        case 16:
+            scanf("%s", nomeArquivoBin);
+            scanf("%s", nomeArquivoBin2);
+            scanf("%*s");
+            scanf("%*s");
+            scanf("%s", nomeArquivoBinIndice);
+            SelectFromWhereUniqueLoop(nomeArquivoBin, nomeArquivoBin2, nomeArquivoBinIndice);
+            return;
+            break;
         case 17:
             scanf("%s", nomeArquivoBin);
             scanf("%s", nomeArquivoBinOrdenado);
