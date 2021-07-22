@@ -136,14 +136,14 @@ void lerLinha_Terminal(linha* currL) {
  * Imprime os campos de uma linha conforme a formatação requisitada
  * @param currLinha linha a ser impressa
  * @param header header do arquivo
+ * @param quebraLinha flag que indica se quebra de linha deve ser executada
  */
-void imprimeLinha(linha currLinha, linhaHeader header) {
+void imprimeLinha(linha currLinha, linhaHeader header, int quebraLinha) {
     imprimirCampo(header.descreveCodigo, &currLinha.codLinha, 1);
     imprimirCampo(header.descreveNome, currLinha.nomeLinha, 0);
     imprimirCampo(header.descreveLinha, currLinha.corLinha, 0);
     imprimirCartao(header.descreveCartao, currLinha.aceitaCartao);  //o cartão recebe um tratamento diferente devido as excessões
-
-    printf("\n");
+    if (quebraLinha) printf("\n");
 }
 
 /**
@@ -292,7 +292,7 @@ void SelectFrom_Linha(char nomeArquivoBin[100]) {
 
     while (!isFinalDoArquivo) {
         isFinalDoArquivo = lerLinha_Bin(arquivoBin, &novaLinha, -1);
-        if (novaLinha.removido == '1') imprimeLinha(novaLinha, novoHeader);
+        if (novaLinha.removido == '1') imprimeLinha(novaLinha, novoHeader, 1);
     }
 
     fclose(arquivoBin);
@@ -342,7 +342,7 @@ void SelectFromWhere_Linha(char nomeArquivoBin[100], char* campo, char* valor) {
         switch (headerPos) {
             case 0:
                 if (linhaTemp.codLinha == stringToInt(valor, (int)strlen(valor))) {
-                    imprimeLinha(linhaTemp, header);
+                    imprimeLinha(linhaTemp, header, 1);
                     fclose(arquivoBin);
                     return;
                     //como o codLinha é unico pode interromper assim que encontrar o primeiro
@@ -362,7 +362,7 @@ void SelectFromWhere_Linha(char nomeArquivoBin[100], char* campo, char* valor) {
         }
 
         if (existe) {  // dado encontrado
-            imprimeLinha(linhaTemp, header);
+            imprimeLinha(linhaTemp, header, 1);
             existePeloMenosUm = 1;
         }
     }
@@ -397,7 +397,7 @@ void InsertInto_Linha(char nomeArquivoBin[100], int numeroDeEntradas) {
     header.status = '0';
     salvaHeader_Linha(arquivoBin, &header);
 
-    while (numeroDeEntradas --) {
+    while (numeroDeEntradas--) {
         lerLinha_Terminal(&novaLinha);
         salvaLinha(arquivoBin, &novaLinha, &header);  // salvo o novo veículo no fim do binário
     }
@@ -473,7 +473,7 @@ void SelectFromWithIndex_Linha(char nomeArquivoBinRegistros[100], char nomeArqui
     // testa se encontrou o registro
     if (byteOffset != -1) {
         lerLinha_Bin(arquivoBinRegistros, &novaLinha, byteOffset);
-        imprimeLinha(novaLinha, novoHeader);
+        imprimeLinha(novaLinha, novoHeader, 1);
     } else {
         printf("Registro inexistente.");
     }

@@ -138,14 +138,15 @@ void imprimeData(char* descricao, char* stringData) {
  * Imprime os campos de um veiculo conforme a formatação requisitada
  * @param currVeiculo veiculo a ser impresso
  * @param header header do arquivo
+ * @param quebraLinha flag que indica se quebra de linha deve ser executada
  */
-void imprimeVeiculo(veiculo currVeiculo, veiculoHeader header) {
+void imprimeVeiculo(veiculo currVeiculo, veiculoHeader header, int quebraLinha) {
     imprimirCampo(header.descrevePrefixo, currVeiculo.prefixo, 0);
     imprimirCampo(header.descreveModelo, currVeiculo.modelo, 0);
     imprimirCampo(header.descreveCategoria, currVeiculo.categoria, 0);
     imprimeData(header.descreveData, currVeiculo.data);  //impressão diferente devido ao formato
     imprimirCampo(header.descreveLugares, &currVeiculo.quantidadeLugares, 1);
-    printf("\n");
+    if (quebraLinha) printf("\n");
 }
 
 /**
@@ -291,7 +292,7 @@ void SelectFrom_Veiculo(char nomeArquivoBin[100]) {
     //percorre todo o arquivo imprimindo apenas os registros salvos
     while (!isFinalDoArquivo) {
         isFinalDoArquivo = lerVeiculo_Bin(arquivoBin, &novoVeiculo, -1);
-        if (novoVeiculo.removido == '1') imprimeVeiculo(novoVeiculo, novoHeader);
+        if (novoVeiculo.removido == '1') imprimeVeiculo(novoVeiculo, novoHeader, 1);
     }
 
     fclose(arquivoBin);
@@ -357,7 +358,7 @@ void SelectFromWhere_Veiculo(char nomeArquivoBin[100], char* campo, char* valor)
         switch (headerPos) {
             case 0:
                 if (strcmp(valor, veiculoTemp.prefixo) == 0) {
-                    imprimeVeiculo(veiculoTemp, header);
+                    imprimeVeiculo(veiculoTemp, header, 1);
                     fclose(arquivoBin);
                     return;
                     //como o prefixo é unico pode interromper assim que encontrar o primeiro
@@ -383,7 +384,7 @@ void SelectFromWhere_Veiculo(char nomeArquivoBin[100], char* campo, char* valor)
         }
 
         if (existe) {  // dado encontrado
-            imprimeVeiculo(veiculoTemp, header);
+            imprimeVeiculo(veiculoTemp, header, 1);
             existePeloMenosUm = 1;
         }
     }
@@ -493,7 +494,7 @@ void SelectFromWithIndex_Veiculo(char nomeArquivoBinRegistros[100], char nomeArq
     // testa se encontrou o registro
     if (byteOffset != -1) {
         lerVeiculo_Bin(arquivoBinRegistros, &novoVeiculo, byteOffset);
-        imprimeVeiculo(novoVeiculo, novoHeader);
+        imprimeVeiculo(novoVeiculo, novoHeader, 1);
     } else {
         printf("Registro inexistente.");
     }
