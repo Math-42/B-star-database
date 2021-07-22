@@ -158,7 +158,7 @@ void imprimeVeiculo(veiculo currVeiculo, veiculoHeader header, int quebraLinha) 
  * @param header header do arquivo binário
  */
 void salvaVeiculo(FILE* arquivoBin, veiculo* currV, veiculoHeader* header) {
-    fseek(arquivoBin, header->byteProxReg, SEEK_SET);
+    if(ftell(arquivoBin) != header->byteProxReg) fseek(arquivoBin, header->byteProxReg, SEEK_SET);
 
     fwrite(&currV->removido, sizeof(char), 1, arquivoBin);
     fwrite(&currV->tamanhoRegistro, sizeof(int), 1, arquivoBin);

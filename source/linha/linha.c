@@ -579,9 +579,10 @@ int SortReg_Linha(char nomeArquivoBinDesordenado[100], char nomeArquivoBin[100])
         isFinalDoArquivo = lerLinha_Bin(arquivoBinDesordenado, &novaLinha, -1);
         if (novaLinha.removido == '1') arrayDeLinhas[posAtual++] = novaLinha;
     }
-
+    
     qsort(arrayDeLinhas, header.nroRegistros, sizeof(linha), compararLinhas);
-
+    
+    //salva os registros já ordenados
     for (int i = 0; i < header.nroRegistros; i++) {
         salvaLinha(arquivoBinOrdenado, &arrayDeLinhas[i], &novoHeader);
     }
@@ -647,7 +648,7 @@ void Search_LinhaVeiculo(char nomeArquivoVeiculos[100], char nomeArquivoLinha[10
 
     if (!achouPeloMenosUm) printf("Registro inexistente.");
 
-    //fecha todos arquivos abertos e libera memória
+    //fecha todos arquivos abertos
     fclose(arquivoBinLinhas);
     fclose(arquivoBinVeiculos);
 }
