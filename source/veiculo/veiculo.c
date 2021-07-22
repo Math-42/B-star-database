@@ -78,7 +78,7 @@ int lerVeiculo_CSV(FILE* arquivoCSV, veiculo* novoVeiculo) {
  */
 int lerVeiculo_Bin(FILE* arquivoBin, veiculo* currV, long int pos) {
     if (pos != -1) fseek(arquivoBin, pos, 0);
-    lerStringBin(arquivoBin, &currV->removido, 1);
+    if (lerStringBin(arquivoBin, &currV->removido, 1) == -1) return 1;
     currV->tamanhoRegistro = lerInteiroBin(arquivoBin);
 
     lerStringBin(arquivoBin, currV->prefixo, 5);

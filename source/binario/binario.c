@@ -10,7 +10,7 @@
  * @return retorna o tamanho da string
  */
 int lerStringBin(FILE* arquivo, char* string, int tamanho) {
-    fread(string, sizeof(char), tamanho, arquivo);
+    if(fread(string, sizeof(char), tamanho, arquivo) < tamanho) return -1;
     string[tamanho] = '\0';
     return tamanho;
 }
@@ -21,7 +21,7 @@ int lerStringBin(FILE* arquivo, char* string, int tamanho) {
  * @return retorna o inteiro lido
  */
 int lerInteiroBin(FILE* arquivo) {
-    int inteiroLido;
+    int inteiroLido = -1;
     fread(&inteiroLido, sizeof(int), 1, arquivo);
     return inteiroLido;
 }

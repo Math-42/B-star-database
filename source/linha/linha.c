@@ -96,7 +96,7 @@ int lerLinha_CSV(FILE* arquivoCSV, linha* novaLinha) {
  */
 int lerLinha_Bin(FILE* arquivoBin, linha* currL, long int pos) {
     if (pos != -1) fseek(arquivoBin, pos, 0);
-    lerStringBin(arquivoBin, &currL->removido, 1);
+    if (lerStringBin(arquivoBin, &currL->removido, 1) == -1) return 1;
 
     currL->tamanhoRegistro = lerInteiroBin(arquivoBin);
     currL->codLinha = lerInteiroBin(arquivoBin);
